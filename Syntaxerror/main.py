@@ -78,6 +78,9 @@ class Game:
         positions = [(0, 0),(self.settings.screen_width-offset, 0), (0, self.settings.screen_height-offset), (self.settings.screen_width-offset, self.settings.screen_height-offset)]
         for position in positions:
             self._create_enemy(position[0], position[1])
+            
+    def move_enemies(self):
+        
 
 if __name__ == '__main__':
     game = Game()
