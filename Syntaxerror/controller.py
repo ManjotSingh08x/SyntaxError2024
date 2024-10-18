@@ -20,10 +20,29 @@ blue = (0,0,255)
 
 import serial
 try:
-    ard = serial.Serial("COM5", timeout=1)
+    if sys.platform == 'linux':
+        try:
+            ard = serial.Serial("/dev/ttyACM0", timeout=1)
+        except:
+            try:
+                ard = serial.Serial("/dev/ttyACM1", timeout=1)
+            except Exception as e:
+                print(e)
+                exit()
+    elif sys.platform == 'win32':
+        try:
+            ard = serial.Serial("COM5", timeout=1)
+        except:
+            try:
+                ard = serial.Serial("COM4", timeout=1)
+            except:
+                try:
+                    ard = serial.Serial("COM3", timeout=1)
+                except Exception as e:
+                    print(e)
+                    exit()
 except Exception as e:
     print(e)
-    exit()
 
 
 # Main game loop
