@@ -66,20 +66,31 @@ class Game:
         enemy = Enemy(self)
         enemy.start_pos = [x_position, y_position]
 
-        enemy.rect.x = enemy.start_pos[0]
-        enemy.rect.y = enemy.start_pos[1]
+        enemy.rect.x = enemy.start_pos[0] * self.settings.cell_size
+        enemy.rect.y = enemy.start_pos[1] * self.settings.cell_size
+        #print("enemy.start_pos", enemy.start_pos)
+        enemy.find_path()
+        
         self.enemies.add(enemy)
+        #print("enemy", enemy)
     
     def draw_enemies(self):
         self.enemies.update()
         self.enemies.draw(self.screen)
+        #print(self.enemies.spritedict)
+        for enemy in self.enemies:
+            #print(enemy.path)
+            enemy.draw_path()
     def spawn_enemies(self):
-        offset = self.settings.enemy_size
-        positions = [(0, 0),(self.settings.screen_width-offset, 0), (0, self.settings.screen_height-offset), (self.settings.screen_width-offset, self.settings.screen_height-offset)]
+        offset = 1
+        positions = [(0,0), (len(self.terrain.grid[0]) - 1, len(self.terrain.grid) - 1),(0, len(self.terrain.grid) - 1), (len(self.terrain.grid[0]) - 1, 0)]
         for position in positions:
-            self._create_enemy(position[0], position[1])
-            
+            self._create_enemy(position[0], position[1])  
+    
     def move_enemies(self):
+        for enemy in self.enemies:
+            enemy.move_next()
+            
         
 
 if __name__ == '__main__':

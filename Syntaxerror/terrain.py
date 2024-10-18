@@ -243,6 +243,13 @@ class WFCTerrainGenerator:
         
     def output_formatted_grid(self):
         formatted_grid = [[tile[0] for tile in row] for row in self.grid]
+        for i in range(len(formatted_grid)):
+            for j in range(len(formatted_grid[i])):
+                if formatted_grid[i][j] == 0 or formatted_grid[i][j] == 3:
+                    formatted_grid[i][j] = 1
+                elif formatted_grid[i][j] == 1 or formatted_grid[i][j] == 2:
+                    formatted_grid[i][j] = 0
+
         return formatted_grid
         
             

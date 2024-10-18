@@ -1,7 +1,7 @@
 class Settings:
     def __init__(self):
-        self.screen_width = 800-64
-        self.screen_height = 800-64
+        self.screen_width = 800 - 32
+        self.screen_height = 800 -32
         self.bg_color = (0, 0, 0)
         self.cell_size = 32
         self.cell_color = (255, 255, 255)
