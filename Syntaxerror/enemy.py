@@ -56,7 +56,7 @@ class Enemy(Sprite):
             points = []
             for point in self.path:
                 x, y = point
-                points.append((x * self.grid_size, y * self.grid_size))
+                points.append(((x + 0.5) * self.grid_size, (y + 0.5) * self.grid_size))
             # print(points)
             pygame.draw.lines(self.screen, (255, 0, 0), False, points, 2)
             #print("path drawn")

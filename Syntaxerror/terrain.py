@@ -240,6 +240,7 @@ class WFCTerrainGenerator:
         self.ensure_grass_middle(scale)
         self.clear_corners(0.125)
         self.print_grid()
+        self.print_formatted_grid()
         
     def output_formatted_grid(self):
         formatted_grid = [[tile[0] for tile in row] for row in self.grid]
@@ -249,7 +250,14 @@ class WFCTerrainGenerator:
                     formatted_grid[i][j] = 1
                 elif formatted_grid[i][j] == 1 or formatted_grid[i][j] == 2:
                     formatted_grid[i][j] = 0
-
         return formatted_grid
         
-            
+    def print_formatted_grid(self):
+        formatted_grid = self.output_formatted_grid()
+        for y in range(self.height):
+            row = []
+            for x in range(self.width):
+                tile = formatted_grid[y][x]
+                color = TILES[tile][1]  # Get the color associated with the tile
+                row.append(color + str(tile) + Style.RESET_ALL)  # Apply the color
+            print(" ".join(row))

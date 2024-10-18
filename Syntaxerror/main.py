@@ -70,7 +70,6 @@ class Game:
         enemy.rect.y = enemy.start_pos[1] * self.settings.cell_size
         #print("enemy.start_pos", enemy.start_pos)
         enemy.find_path()
-        
         self.enemies.add(enemy)
         #print("enemy", enemy)
     
@@ -79,7 +78,6 @@ class Game:
         self.enemies.draw(self.screen)
         #print(self.enemies.spritedict)
         for enemy in self.enemies:
-            #print(enemy.path)
             enemy.draw_path()
     def spawn_enemies(self):
         offset = 1
