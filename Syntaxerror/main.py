@@ -7,10 +7,8 @@ from enemy import Enemy
 from settings import Settings
 from terrain import WFCTerrainGenerator
 from wall import Wall
-<<<<<<< HEAD
 from cannon import Cannon  # Import the Cannon class
 from bomb import Bomb      # Import the Bomb class
-=======
 from player import Player
 import serial.tools.list_ports
 from cannon import Cannon
@@ -35,13 +33,10 @@ class Game:
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
         self.enemies = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
-<<<<<<< HEAD
         self.bombs = pygame.sprite.Group()  # Group for bombs
         self.cannons = pygame.sprite.Group()  # Group for cannons
-=======
         self.cannons = pygame.sprite.Group()
         self.bombs = pygame.sprite.Group()
->>>>>>> 1eeebb61e7e93512018c9fee76df55d6816d0784
         self.mousedown = False
 
         pygame.display.set_caption('Citadel Siege')
@@ -53,9 +48,8 @@ class Game:
         self.terrain.create_terrain(self.settings.clear_area_scale)
         self.clock = pygame.time.Clock()
         self.spawn_enemies()
-<<<<<<< HEAD
         self.place_cannon()  # Automatically place cannon in the center
-=======
+
         # self.set_controller_port()
         self.spawn_player()
         self.place_cannon()
@@ -75,8 +69,6 @@ class Game:
                     self.set_controller_port()
                     break  # Exit loop if connection is successful
 
->>>>>>> 1eeebb61e7e93512018c9fee76df55d6816d0784
-
     def rungame(self):
         while True:
             if self.state == gamestate.MENU:
@@ -84,12 +76,10 @@ class Game:
                 
             self._check_events()
             self.draw_grid()
-<<<<<<< HEAD
             self.draw_enemies()
             self._update_walls()
             self._update_bombs()  # Update bombs
             self._update_cannons()  # Update cannons
-=======
             if self.arduino_connected:
                 self.move_player_arduino()
             else:
@@ -100,7 +90,7 @@ class Game:
             self.draw_player()
             self.draw_enemies()   
 
->>>>>>> 1eeebb61e7e93512018c9fee76df55d6816d0784
+
             self.enemy_pathfind()
             pygame.display.flip()
             
@@ -190,12 +180,7 @@ class Game:
             new_wall = Wall(self, grid_x, grid_y)
             self.walls.add(new_wall)
             self.terrain.grid[grid_y][grid_x][0] = 4
-<<<<<<< HEAD
 
-=======
-            
-
-        
     def spawn_player(self):
         self.player = Player(self)
         self.player.rect.x = self.player.start_pos[0] * self.settings.cell_size
@@ -344,17 +329,11 @@ class Game:
     def _update_cannons(self):
         self.cannons.update()
         self.cannons.draw(self.screen)
-<<<<<<< HEAD
-=======
-        
+
     def game_over(self):
         #sys.exit()
         pass
         
-            
-        
->>>>>>> 1eeebb61e7e93512018c9fee76df55d6816d0784
-
 if __name__ == '__main__':
     game = Game()
     game.rungame()
