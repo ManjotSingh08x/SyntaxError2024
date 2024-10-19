@@ -1,7 +1,6 @@
 import pygame
 import sys
 import pathfinding
-import serial
 from pygame.sprite import Sprite
 from enemy import Enemy
 from settings import Settings
@@ -14,21 +13,20 @@ import serial.tools.list_ports
 from cannon import Cannon
 from bomb import Bomb
 from enum import Enum
+import re
+import subprocess
 
-class gamestate(Enum):
-    MENU = 0
-    BUILD = 1
-    ATTACK = 2
+
 
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
+WHITE = (255,255,255)
 
 class Game:
     def __init__(self):
         pygame.init()
-        self.state = gamestate.MENU
         self.settings = Settings()
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
         self.enemies = pygame.sprite.Group()
@@ -38,41 +36,97 @@ class Game:
         self.cannons = pygame.sprite.Group()
         self.bombs = pygame.sprite.Group()
         self.mousedown = False
+        self.font = pygame.font.Font(None, 50)
 
         pygame.display.set_caption('Citadel Siege')
         self.game_active = True 
+        
+        self.hs_running = True
+        self.game_running = False
+        self.use_arduino = False
+        self.arduino_connected = False
+        
         self.terrain = WFCTerrainGenerator(
             self.settings.screen_width // self.settings.cell_size,
             self.settings.screen_height // self.settings.cell_size,
             self.settings.mountain_rate, self.settings.tree_chance)
         self.terrain.create_terrain(self.settings.clear_area_scale)
         self.clock = pygame.time.Clock()
+        self.spawn_player()
         self.spawn_enemies()
         self.place_cannon()  # Automatically place cannon in the center
+        self.runHomeScreen()
 
-        # self.set_controller_port()
-        self.spawn_player()
-        self.place_cannon()
-        self.arduino_connected = False
-        if self.settings.arduino_control:
+        
+    def runHomeScreen(self):
+        while self.hs_running:
+            print('hi')
+            self.screen.fill(YELLOW)
+            button1_rect = pygame.Rect(self.settings.screen_width // 2 - 150, self.settings.screen_height // 2 - 100, 300, 70)
+            button2_rect = pygame.Rect(self.settings.screen_width // 2 - 150, self.settings.screen_height // 2 + 50, 300, 70)
+
+            # Get the mouse position
+            mouse_pos = pygame.mouse.get_pos()
+
+            # Change button colors on hover
+            if button1_rect.collidepoint(mouse_pos):
+                button1_color = BLUE
+            else:
+                button1_color = GREEN
+
+            if button2_rect.collidepoint(mouse_pos):
+                button2_color = BLUE
+            else:
+                button2_color = RED
+
+            # Draw the buttons
+            pygame.draw.rect(self.screen, button1_color, button1_rect)
+            pygame.draw.rect(self.screen, button2_color, button2_rect)
+
+            # Draw button text
+            self.draw_text("Use Arduino", self.font, WHITE, self.screen, self.settings.screen_width // 2, self.settings.screen_height // 2 - 65)
+            self.draw_text("Use Keyboard", self.font, WHITE, self.screen, self.settings.screen_width // 2, self.settings.screen_height // 2 + 85)
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if button1_rect.collidepoint(event.pos):
+                        self.use_arduino = True
+                        self.hs_running = False
+                    if button2_rect.collidepoint(event.pos):
+                        self.use_arduino = False
+                        self.hs_running = False
+                        
+            pygame.display.flip()
+                        
+        self.screen.fill(YELLOW)
+        if self.use_arduino:
+            
             ports = serial.tools.list_ports.comports()
-            poorts = [port.device for port in ports]
-            # List available ports
-            print("Available Serial Ports:")
-            for port in poorts:
-                print(port)
-            # Check connection for each available port
-            for port in poorts:
-                if self.check_arduino_connection(port):
-                    print("Arduino connected on port: " + port)
+            for port in ports:
+                if 'Arduino' in port.description:
+                    try:
+                        self.ard = serial.Serial(port.device, 9600)
+                    except Exception as e:
+                        print(e)
+                        print("couldn't connect to arduino")
+                        sys.exit()
                     self.arduino_connected = True
-                    self.set_controller_port()
-                    break  # Exit loop if connection is successful
-
+                    break
+                
+            if not self.arduino_connected:
+                print("No connected arduino found")
+                sys.exit()
+        else:
+            print('done')
+            self.settings.player_max_speed = 4
+            self.settings.enemy_speed = 1
+            
+        self.game_running = True
+        self.rungame()
     def rungame(self):
-        while True:
-            if self.state == gamestate.MENU:
-                self.menu()
+        while self.game_running:
                 
             self._check_events()
             self.draw_grid()
@@ -80,7 +134,7 @@ class Game:
             self._update_walls()
             self._update_bombs()  # Update bombs
             self._update_cannons()  # Update cannons
-            if self.arduino_connected:
+            if self.use_arduino:
                 self.move_player_arduino()
             else:
                 self.move_player_keyboard()
@@ -94,8 +148,11 @@ class Game:
             self.enemy_pathfind()
             pygame.display.flip()
             
-    def menu(self):
-        pass
+    def draw_text(self, text, font, color, surface, x, y):
+        text_obj = font.render(text, True, color)
+        text_rect = text_obj.get_rect(center=(x, y))
+        surface.blit(text_obj, text_rect)
+
     def _check_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -111,7 +168,7 @@ class Game:
 
     def _check_keydown_events(self, event):
         if event.key == pygame.K_ESCAPE:
-            sys.exit()
+            self.game_running = False
 
     def _check_keyup_events(self, event):
         pass
@@ -191,57 +248,8 @@ class Game:
         self.player.update()
         self.player.draw(self.screen)
         
-    def set_controller_port(self):
-        try:
-            print("entered contoller port try block")
-            if sys.platform == 'linux':
-                try:
-                    self.ard = serial.Serial("/dev/ttyACM0", 9600)
-
-
-                except:
-                    try:
-                        self.ard = serial.Serial("/dev/ttyACM1", 9600)
-
-                    except Exception as e:
-                        print(e)
-                        self.arduino_connected = False
-                    
-            elif sys.platform == 'win32':
-                print("entered win32 contoller port try block")
-                try:
-                    print('1')
-                    self.ard = serial.Serial("COM5", 9600)
-                except:
-                    try:
-                        print(2)
-                        self.ard = serial.Serial("COM4", 9600)
-                        print(self.ard)
-                    except:
-                        print(2.5)
-                        try:
-                            print(3)
-                            self.ard = serial.Serial("COM3", 9600)
-                        except Exception as e:
-                            print("error")
-                            print(e)
-                            self.arduino_connected = False
-        except Exception as e:
-            print("reached end error")
-            print(e)
-            self.arduino_connected = False
-            
-    def check_arduino_connection(self, port_name):
-        try:
-            # Attempt to open the specified serial port
-            with serial.Serial(port_name, baudrate=9600, timeout=1) as ser:
-                print(f"Connected to Arduino on {port_name}")
-                return True
-        except serial.SerialException as e:
-            print(f"Failed to connect to Arduino on {port_name}: {e}")
-            return False
-        
-            
+    
+    
     def move_player_arduino(self):
         try:
             line = self.ard.readline()
@@ -278,8 +286,9 @@ class Game:
             
             self.player.rect.x += speed_x
             self.player.rect.y += speed_y
-            
+            self.player.rect.clamp_ip(self.screen.get_rect())
             self.run_button_functions(bj, b1, b2, b3)
+            
 
         except Exception as e:
             print(e)
@@ -336,4 +345,6 @@ class Game:
         
 if __name__ == '__main__':
     game = Game()
-    game.rungame()
+    
+    if game.use_arduino:
+        game.ard.close()

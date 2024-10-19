@@ -22,7 +22,6 @@ class Enemy(Sprite):
         
         # movement settings for rendering
         self.pos = self.rect.center
-        self.speed = self.settings.enemy_speed
         self.direction = pygame.math.Vector2(0, 0)
 
         # Grid and position settings
@@ -80,7 +79,7 @@ class Enemy(Sprite):
             
     def update(self):
         if not self.attacking:
-            self.pos += self.direction * self.speed
+            self.pos += self.direction * self.settings.enemy_speed
             self.check_collisions()
             self.rect.center = self.pos
         
