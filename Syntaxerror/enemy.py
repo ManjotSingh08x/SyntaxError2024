@@ -73,7 +73,6 @@ class Enemy(Sprite):
             #print("path drawn")
             
     def update(self):
-        print(self.pos)
         self.pos += self.direction * self.speed
         self.check_collisions()
         self.rect.center = self.pos
