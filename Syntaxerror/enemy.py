@@ -18,6 +18,11 @@ class Enemy(Sprite):
         self.image = pygame.Surface((self.settings.enemy_size, self.settings.enemy_size))  # Create enemy surface
         self.image.fill((0, 0, 0))  # Fill it with a color, black in this case
         self.rect = self.image.get_rect()
+        
+        # movement settings for rendering
+        self.pos = self.rect.center
+        self.speed = self.settings.enemy_speed
+        self.direction = pygame.math.Vector2(0, 0)
 
         # Grid and position settings
         self.start_pos = [0, 0]
@@ -40,7 +45,8 @@ class Enemy(Sprite):
         #print(self.terrain.output_formatted_grid())
         # Get the start and end nodes
         #print(self.start_pos[0], self.start_pos[1])
-        start_node = grid.node(self.start_pos[0], self.start_pos[1])
+        start_x, start_y = self.get_coord()
+        start_node = grid.node(self, self)
         #print("end positions", self.target_grid_position[0], self.target_grid_position[1])
         end_node = grid.node(self.target_grid_position[0], self.target_grid_position[1])
         
@@ -60,3 +66,10 @@ class Enemy(Sprite):
             # print(points)
             pygame.draw.lines(self.screen, (255, 0, 0), False, points, 2)
             #print("path drawn")
+            
+    def move_step(self):
+        self.pos += self.direction * self.speed
+        self.rect.center = self.pos
+        
+    def get_coord(self):
+        x, y = self.grid_pos

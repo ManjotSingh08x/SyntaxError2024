@@ -38,6 +38,7 @@ class Game:
             self._check_events()
             self.draw_grid()
             self.draw_enemies()   
+            #self.enemy_pathfind()
             self.clock.tick(60)
             pygame.display.flip()
 
@@ -88,6 +89,10 @@ class Game:
     def move_enemies(self):
         for enemy in self.enemies:
             enemy.move_next()
+            
+    def enemy_pathfind(self):
+        for enemy in self.enemies:
+            enemy.find_path()
             
         
 

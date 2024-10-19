@@ -110,6 +110,21 @@ class WFCTerrainGenerator:
                 possible_moves.append((x + 1, y - 1))
             if dx < 0 and dy < 0:
                 possible_moves.append((x - 1, y - 1))
+                
+            if random.random() < 0.9:  # 30% chance to introduce a random deviation
+                jitter_moves = [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+                jitter = random.choice(jitter_moves)
+                possible_moves.append(jitter)
+            # Introduce more randomness by adding unrelated directions (to drift)
+            drift_moves = [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1), 
+                        (x + 1, y + 1), (x - 1, y - 1), (x + 1, y - 1), (x - 1, y + 1)]
+            
+            # 50% chance to add a drift move, making the path more random and wavy
+            if random.random() < 0.9:
+                random_drift = random.choice(drift_moves)
+                possible_moves.append(random_drift)
+                random_drift = random.choice(drift_moves)
+                possible_moves.append(random_drift)
 
             # Randomly pick one of the possible moves to add some winding randomness
             current = random.choice(possible_moves)
