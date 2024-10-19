@@ -11,6 +11,7 @@ class Cannon(pygame.sprite.Sprite):
         self.image.fill((255, 192, 203))  # Pink color for the cannon
         self.rect = self.image.get_rect(center=(game.settings.screen_width // 2, game.settings.screen_height // 2))
         self.attack_timer = 0  # Timer to control attack frequency
+        self.health = 1000
 
     def update(self):
         self.attack_timer += 1  # Increment the attack timer
@@ -26,3 +27,10 @@ class Cannon(pygame.sprite.Sprite):
                 (self.rect.centery - enemy.rect.centery) ** 2)
             bomb = Bomb(self, closest_enemy.rect.center)
             self.game.bombs.add(bomb)  # Add bomb to the game
+    def take_damage(self, damage):
+        self.health -= damage
+        print("wall taking damage")
+        if self.health <= 0:
+            self.game.terrain.grid[self.y][self.x][0] = 0
+            self.kill()
+            self.game.game_over()

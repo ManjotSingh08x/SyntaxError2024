@@ -30,6 +30,8 @@ class Game:
         ))
         self.enemies = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
+        self.cannons = pygame.sprite.Group()
+        self.bombs = pygame.sprite.Group()
         self.mousedown = False
 
         pygame.display.set_caption('Citadel Siege')
@@ -46,6 +48,7 @@ class Game:
         self.arduino_connected = False
         ports = serial.tools.list_ports.comports()
         poorts = [port.device for port in ports]
+        self.place_cannon()
 
     # List available ports
         
@@ -71,6 +74,8 @@ class Game:
                 self.move_player_arduino()
             else:
                 self.move_player_keyboard()
+            self._update_bombs()  # Update bombs
+            self._update_cannons()  # Update cannons
             self.draw_player()
             self.draw_enemies()   
 
@@ -283,6 +288,22 @@ class Game:
     def move_player_keyboard(self):
         keys = pygame.key.get_pressed()
         print(keys)
+        
+    def place_cannon(self):
+        cannon = Cannon(self)  # Create the cannon at the center
+        self.cannons.add(cannon)
+
+    def _update_bombs(self):
+        self.bombs.update()
+        self.bombs.draw(self.screen)
+
+    def _update_cannons(self):
+        self.cannons.update()
+        self.cannons.draw(self.screen)
+        
+    def game_over(self):
+        #sys.exit()
+        pass
         
             
         

@@ -36,6 +36,7 @@ class Enemy(Sprite):
         self.target_grid_position = [self.target_x, self.target_y]
         self.path = self.find_path()
         self.collision_rects = []
+        self.health = self.settings.enemy_health
         
         # attacking confiurations
         self.attacking = False
@@ -92,6 +93,16 @@ class Enemy(Sprite):
                     self.attacking = False
         else:
             self.attacking = False
+        
+        collided_cannons = pygame.sprite.spritecollide(self, self.game.cannons, False)
+        if collided_cannons:
+            self.attacking = True
+            for cannon in collided_cannons:
+                cannon.take_damage(1)
+                if cannon.health <= 0:
+                    self.attacking = False
+        else:
+            self.attacking = False
 
         
         
@@ -123,4 +134,9 @@ class Enemy(Sprite):
             self.direction = (end - start).normalize()
         else:
             self.direction = pygame.math.Vector2(0,0)
-            self.path = [0]   
+            self.path = [0]  
+    def take_damage(self, damage):
+        self.health -= damage
+        print("enemy taking damage") 
+        if self.health <= 0:
+            self.kill()
