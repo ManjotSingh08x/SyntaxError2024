@@ -21,7 +21,7 @@ import subprocess
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 RED = (255, 0, 0)
-YELLOW = (255, 255, 0)
+YELLOW = (255, 255, 0)                       
 WHITE = (255,255,255)
 
 class Game:
@@ -35,6 +35,7 @@ class Game:
         self.cannons = pygame.sprite.Group()  # Group for cannons
         self.cannons = pygame.sprite.Group()
         self.bombs = pygame.sprite.Group()
+        self.mode = 0 # 0 = buildmode, 1 = attackmode
         self.mousedown = False
         self.font = pygame.font.Font(None, 50)
 
@@ -105,6 +106,7 @@ class Game:
             
             ports = serial.tools.list_ports.comports()
             for port in ports:
+                print(port)
                 if 'Arduino' in port.description:
                     try:
                         self.ard = serial.Serial(port.device, 9600)
@@ -127,26 +129,54 @@ class Game:
         self.rungame()
     def rungame(self):
         while self.game_running:
-                
-            self._check_events()
-            self.draw_grid()
-            self.draw_enemies()
-            self._update_walls()
-            self._update_bombs()  # Update bombs
-            self._update_cannons()  # Update cannons
-            if self.use_arduino:
-                self.move_player_arduino()
+            if self.mode == 0:
+                self.buildmode()
             else:
-                self.move_player_keyboard()
-                self.clock.tick(60)
-            self._update_bombs()  # Update bombs
-            self._update_cannons()  # Update cannons
-            self.draw_player()
-            self.draw_enemies()   
+                self.attackmode()
+            # self._check_events()
+            # self.draw_grid()
+            # self._update_walls()
+            # self.draw_enemies()
+            # if self.use_arduino:
+            #     self.move_player_arduino()
+            # else:
+            #     self.move_player_keyboard()
+            #     self.clock.tick(60)
+            # self._update_bombs()  # Update bombs
+            # self._update_cannons()  # Update cannons
+            # self.draw_player()
+            # self.draw_enemies()   
 
 
-            self.enemy_pathfind()
+            # self.enemy_pathfind()
             pygame.display.flip()
+    
+    def buildmode(self):
+        self._check_events()
+        self.draw_grid()
+        self._update_walls()
+        # self.player.config_player_build()
+        
+        if self.use_arduino:
+            self.move_player_arduino()
+        else:
+            self.move_player_keyboard()
+            self.clock.tick(60)
+        self.draw_player()
+    def attackmode(self):
+        self._check_events()
+        self.draw_grid()
+        self._update_walls()
+        self.draw_enemies()
+        if self.use_arduino:
+            self.move_player_arduino()
+        else:
+            self.move_player_keyboard()
+            self.clock.tick(60)
+        self._update_bombs()  # Update bombs
+        self._update_cannons()  # Update cannons
+        self.draw_player()
+        self.draw_enemies()  
             
     def draw_text(self, text, font, color, surface, x, y):
         text_obj = font.render(text, True, color)
@@ -169,9 +199,12 @@ class Game:
     def _check_keydown_events(self, event):
         if event.key == pygame.K_ESCAPE:
             self.game_running = False
+        elif event.key == pygame.K_SPACE:
+            self.player.building = True
 
     def _check_keyup_events(self, event):
-        pass
+        if event.key == pygame.K_SPACE:
+            self.player.building = False
 
     def _check_mouse_button_down_events(self, event):
         if event.button == 1:
@@ -227,12 +260,22 @@ class Game:
         self.walls.update()
         self.walls.draw(self.screen)
         if self.mousedown:
-            self._create_new_walls()
+            self._create_new_walls_at_mouse()
+        elif self.player.building:
+            self._create_new_walls_at_player()
 
-    def _create_new_walls(self):
+    def _create_new_walls_at_mouse(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
         grid_x = mouse_x // self.settings.cell_size
         grid_y = mouse_y // self.settings.cell_size
+        if self.terrain.grid[grid_y][grid_x][0] == 0:
+            new_wall = Wall(self, grid_x, grid_y)
+            self.walls.add(new_wall)
+            self.terrain.grid[grid_y][grid_x][0] = 4
+    
+    def _create_new_walls_at_player(self):
+        grid_x = self.player.rect.x // self.settings.cell_size
+        grid_y = self.player.rect.y // self.settings.cell_size
         if self.terrain.grid[grid_y][grid_x][0] == 0:
             new_wall = Wall(self, grid_x, grid_y)
             self.walls.add(new_wall)
@@ -242,7 +285,7 @@ class Game:
         self.player = Player(self)
         self.player.rect.x = self.player.start_pos[0] * self.settings.cell_size
         self.player.rect.y = self.player.start_pos[1] * self.settings.cell_size
-        # self.player.draw(self.screen)
+        self.player.draw(self.screen)
         
     def draw_player(self):
         self.player.update()
@@ -258,10 +301,10 @@ class Game:
 
             x = int(splitted_line[0].strip(" ").strip("\n"))
             y = int(splitted_line[1].strip(" ").strip("\n"))
-            bj = bool(int(splitted_line[2].strip(" ").strip("\n")))
-            b1 = bool(int(splitted_line[3].strip(" ").strip("\n")))
-            b2 = bool(int(splitted_line[4].strip(" ").strip("\n")))
-            b3 = bool(int(splitted_line[5].strip(" ").strip("\n")))
+            bj = not bool(int(splitted_line[2].strip(" ").strip("\n")))
+            b1 = not bool(int(splitted_line[3].strip(" ").strip("\n")))
+            b2 = not bool(int(splitted_line[4].strip(" ").strip("\n")))
+            b3 = not bool(int(splitted_line[5].strip(" ").strip("\n")))
 
             x_default = 504
             y_default = 513
@@ -298,9 +341,18 @@ class Game:
         self.draw_player()
 
     def run_button_functions(self, bj, b1, b2, b3):
-        pass
+        if b1:
+            print("b1 pressed")
+            self.player.building = True
+        if b2:
+            print("b2 pressed")
+        if b3:
+            print("b3 pressed")
+        if bj:
+            print("bj pressed")
     
     def move_player_keyboard(self):
+        
         keys = pygame.key.get_pressed()
         
         # Initialize movement vector
