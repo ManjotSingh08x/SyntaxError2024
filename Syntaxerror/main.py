@@ -135,6 +135,7 @@ class Game:
             # Place a wall in the grid
             self.terrain.grid[grid_y][grid_x][0] = 4
             print("created a wall")
+            print("hello ")
         
             
         
