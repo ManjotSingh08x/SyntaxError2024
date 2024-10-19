@@ -38,7 +38,7 @@ class Game:
             self._check_events()
             self.draw_grid()
             self.draw_enemies()   
-            #self.enemy_pathfind()
+            self.enemy_pathfind()
             self.clock.tick(60)
             pygame.display.flip()
 
@@ -69,6 +69,7 @@ class Game:
 
         enemy.rect.x = enemy.start_pos[0] * self.settings.cell_size
         enemy.rect.y = enemy.start_pos[1] * self.settings.cell_size
+        enemy.pos = enemy.rect.center
         #print("enemy.start_pos", enemy.start_pos)
         enemy.find_path()
         self.enemies.add(enemy)
@@ -85,11 +86,7 @@ class Game:
         positions = [(0,0), (len(self.terrain.grid[0]) - 1, len(self.terrain.grid) - 1),(0, len(self.terrain.grid) - 1), (len(self.terrain.grid[0]) - 1, 0)]
         for position in positions:
             self._create_enemy(position[0], position[1])  
-    
-    def move_enemies(self):
-        for enemy in self.enemies:
-            enemy.move_next()
-            
+              
     def enemy_pathfind(self):
         for enemy in self.enemies:
             enemy.find_path()
