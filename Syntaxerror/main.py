@@ -1,9 +1,10 @@
 import pygame
 import sys
 import pathfinding
+import time
 from pygame.sprite import Sprite
 from enemy import Enemy
-from settings import Settings
+import settings_base
 from terrain import WFCTerrainGenerator
 from wall import Wall
 from cannon import Cannon  # Import the Cannon class
@@ -12,9 +13,6 @@ from player import Player
 import serial.tools.list_ports
 from cannon import Cannon
 from bomb import Bomb
-from enum import Enum
-import re
-import subprocess
 
 
 
@@ -24,38 +22,47 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)                       
 WHITE = (255,255,255)
 
+class Settings_Ard(settings_base.Settings):
+    def __init__(self):
+        super().__init__()
+        self.enemy_speed = 1
+        self.player_max_speed = 15
+    
+class Settings_Key(settings_base.Settings):
+    def __init__(self):
+        super().__init__()
+        self.enemy_speed = 0.1
+        self.player_max_speed = 15
+
 class Game:
     def __init__(self):
         pygame.init()
-        self.settings = Settings()
+        self.settings = settings_base.Settings()
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
         self.enemies = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
         self.bombs = pygame.sprite.Group()  # Group for bombs
         self.cannons = pygame.sprite.Group()  # Group for cannons
-        self.cannons = pygame.sprite.Group()
-        self.bombs = pygame.sprite.Group()
-        self.mode = 0 # 0 = buildmode, 1 = attackmode
+        self.attackmode =  False# 0 = buildmode, 1 = attackmode
         self.mousedown = False
         self.font = pygame.font.Font(None, 50)
+        self.current_level = 1
 
         pygame.display.set_caption('Citadel Siege')
         self.game_active = True 
         
         self.hs_running = True
+        self.gv_running = False
         self.game_running = False
         self.use_arduino = False
         self.arduino_connected = False
         
         self.terrain = WFCTerrainGenerator(
-            self.settings.screen_width // self.settings.cell_size,
-            self.settings.screen_height // self.settings.cell_size,
-            self.settings.mountain_rate, self.settings.tree_chance)
+        self.settings.screen_width // self.settings.cell_size,
+        self.settings.screen_height // self.settings.cell_size,
+        self.settings.mountain_rate, self.settings.tree_chance)
         self.terrain.create_terrain(self.settings.clear_area_scale)
         self.clock = pygame.time.Clock()
-        self.spawn_player()
-        self.spawn_enemies()
-        self.place_cannon()  # Automatically place cannon in the center
         self.runHomeScreen()
 
         
@@ -103,6 +110,7 @@ class Game:
                         
         self.screen.fill(YELLOW)
         if self.use_arduino:
+            self.settings = Settings_Ard()
             
             ports = serial.tools.list_ports.comports()
             for port in ports:
@@ -121,37 +129,49 @@ class Game:
                 print("No connected arduino found")
                 sys.exit()
         else:
-            print('done')
+            
+            self.settings = Settings_Key()
             self.settings.player_max_speed = 4
             self.settings.enemy_speed = 1
             
+        self.spawn_player()
+        self.spawn_enemies()
+        self.place_cannon()  # Automatically place cannon in the center
+
         self.game_running = True
         self.rungame()
     def rungame(self):
+        self.set_timer()
         while self.game_running:
-            if self.mode == 0:
+            print(self.current_level)
+            if not self.attackmode:
+                
                 self.buildmode()
+                # swtiches from buildmode to attackmode
+                if self.past_time()>self.settings.timer:
+                    print("TIME OVER")
+                    self.attackmode = True
+                    self.spawn_enemies()
+                    print("switched attackmode")
+                    
             else:
-                self.attackmode()
-            # self._check_events()
-            # self.draw_grid()
-            # self._update_walls()
-            # self.draw_enemies()
-            # if self.use_arduino:
-            #     self.move_player_arduino()
-            # else:
-            #     self.move_player_keyboard()
-            #     self.clock.tick(60)
-            # self._update_bombs()  # Update bombs
-            # self._update_cannons()  # Update cannons
-            # self.draw_player()
-            # self.draw_enemies()   
-
-
-            # self.enemy_pathfind()
+                # swtiches from attackmode to buildmode
+                self.attackmodefunc()
+                if len(self.enemies)==0:
+                    self.attackmode = False
+                    self.set_timer()
+                    self.current_level += 1
+            self.enemy_pathfind()
             pygame.display.flip()
     
+    def set_timer(self):
+        self.start_time = time.time()
+    
+    def past_time(self):
+        return time.time() - self.start_time
+    
     def buildmode(self):
+        print("build mode")
         self._check_events()
         self.draw_grid()
         self._update_walls()
@@ -163,11 +183,13 @@ class Game:
             self.move_player_keyboard()
             self.clock.tick(60)
         self.draw_player()
-    def attackmode(self):
+    def attackmodefunc(self):
+        print("attack mode")
         self._check_events()
         self.draw_grid()
         self._update_walls()
         self.draw_enemies()
+        # self.player.config_player_attack()
         if self.use_arduino:
             self.move_player_arduino()
         else:
@@ -344,6 +366,8 @@ class Game:
         if b1:
             print("b1 pressed")
             self.player.building = True
+        else:
+            self.player.building = False
         if b2:
             print("b2 pressed")
         if b3:
@@ -391,9 +415,12 @@ class Game:
         self.cannons.update()
         self.cannons.draw(self.screen)
 
-    def game_over(self):
-        #sys.exit()
-        pass
+    def run_game_over(self):
+        while gv_running:
+            print("cry about it")
+            self.screen.fill(YELLOW)
+            
+            
         
 if __name__ == '__main__':
     game = Game()

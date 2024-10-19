@@ -27,6 +27,5 @@ class Player(Sprite):
         self.grid_pos = [self.settings.screen_width // (self.settings.cell_size * 2), self.settings.screen_height // (self.settings.cell_size * 2)]  # Starting grid position
         self.grid_size = self.settings.cell_size
 
-
     def draw(self, surface):
         surface.blit(self.image, self.rect)
