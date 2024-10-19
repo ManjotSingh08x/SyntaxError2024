@@ -12,6 +12,8 @@ class Settings:
         self.enemy_speed = 1
         self.wall_health = 100
         self.enemy_damage = 1
+        self.cannon_color = (100,255,100)
+        self.cannon_size = self.cell_size
         self.enemy_size = self.cell_size
         
         # current best settings

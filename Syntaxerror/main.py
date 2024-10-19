@@ -6,7 +6,7 @@ from enemy import Enemy
 from settings import Settings
 from terrain import WFCTerrainGenerator
 from wall import Wall
-
+from cannon import Cannon
 
 
 GREEN = (0, 255, 0)
@@ -24,6 +24,7 @@ class Game:
             ))
         self.enemies = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
+        self.cannons = pygame.sprite.Group()
         self.mousedown = False
         
         pygame.display.set_caption('Citedal Seige')
@@ -43,6 +44,7 @@ class Game:
             self._update_walls()
             self.draw_grid()
             self.draw_enemies()   
+            self.update_cannons()
             self.enemy_pathfind()
             self.clock.tick(60)
             pygame.display.flip()
@@ -63,6 +65,8 @@ class Game:
     def _check_keydown_events(self, event):
         if event.key == pygame.K_ESCAPE:
             sys.exit()
+        elif event.key == pygame.K_SPACE:
+            self.place_cannon()
     
     def _check_keyup_events(self, event):
         pass
@@ -135,7 +139,21 @@ class Game:
             # Place a wall in the grid
             self.terrain.grid[grid_y][grid_x][0] = 4
             
+    def place_cannon(self):
+        """Places a cannon at the mouse position when space is pressed"""
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        grid_x = mouse_x // self.settings.cell_size
+        grid_y = mouse_y // self.settings.cell_size
+        if self.terrain.grid[grid_y][grid_x][0] == 0:
+            new_cannon = Cannon(self, grid_x, grid_y)
+            self.cannons.add(new_cannon)
+            # Place a wall in the grid
+            self.terrain.grid[grid_y][grid_x][0] = 5
     
+    def update_cannons(self):
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        self.cannons.update(mouse_x, mouse_y)
+        self.cannons.draw(self.screen)
         
             
         
