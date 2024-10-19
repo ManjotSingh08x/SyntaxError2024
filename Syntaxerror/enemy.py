@@ -97,6 +97,7 @@ class Enemy(Sprite):
             for cannon in collided_cannons:
                 cannon.take_damage(1)
                 if cannon.health <= 0:
+                    self.game.gameOverScreen()
                     self.attacking = False
         else:
             self.attacking = False

@@ -65,7 +65,17 @@ class Game:
         self.clock = pygame.time.Clock()
         self.runHomeScreen()
 
+    def display_levels(self):
+        self.text_color = (30,30,30)
+        self.font = pygame.font.SysFont(None, 48)
         
+        level_str = str(self.current_level)
+        self.level_image = self.font.render(level_str, True,
+            self.text_color)
+        self.level_rect = self.level_image.get_rect()
+        self.level_rect.right = self.screen.get_rect().right
+        self.level_rect.top = 10 + self.screen.get_rect().top
+        self.screen.blit(self.level_image, self.level_rect)
     def runHomeScreen(self):
         while self.hs_running:
             print('hi')
@@ -161,6 +171,7 @@ class Game:
                     self.attackmode = False
                     self.set_timer()
                     self.current_level += 1
+            self.display_levels()
             self.enemy_pathfind()
             pygame.display.flip()
     
@@ -415,10 +426,24 @@ class Game:
         self.cannons.update()
         self.cannons.draw(self.screen)
 
-    def run_game_over(self):
-        while gv_running:
-            print("cry about it")
+    
+    def gameOverScreen(self):
+        self.game_running = False
+        while True:
+            print('game over')
             self.screen.fill(YELLOW)
+            
+            # Change button colors on hover
+            # Draw the buttons
+
+            # Draw button text
+            self.draw_text("Game Over", self.font, WHITE, self.screen, self.settings.screen_width // 2, self.settings.screen_height // 2 - 65)
+            self.draw_text(f"Score: {self.current_level*100}", self.font, WHITE, self.screen, self.settings.screen_width // 2, self.settings.screen_height//2+85)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+            pygame.display.flip()
             
             
         

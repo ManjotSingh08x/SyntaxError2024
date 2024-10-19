@@ -13,7 +13,7 @@ class Cannon(pygame.sprite.Sprite):
         self.x = self.rect.x
         self.y = self.rect.y
         self.attack_timer = 0  # Timer to control attack frequency
-        self.health = 1000
+        self.health = self.game.settings.cannon_health
 
     def update(self):
         self.attack_timer += 1  # Increment the attack timer
@@ -34,4 +34,4 @@ class Cannon(pygame.sprite.Sprite):
         print("cannon taking damage")
         if self.health <= 0:
             self.kill()
-            self.game.game_over()
+            self.game.gameOverScreen()
