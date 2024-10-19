@@ -85,17 +85,15 @@ class Enemy(Sprite):
             self.rect.center = self.pos
         
         collided_walls =pygame.sprite.spritecollide(self, self.game.walls, False)
+        collided_cannons = pygame.sprite.spritecollide(self, self.game.cannons, False)
         if collided_walls:
             self.attacking = True
             for wall in collided_walls:
                 wall.take_damage(1)
                 if wall.health <= 0:
                     self.attacking = False
-        else:
-            self.attacking = False
         
-        collided_cannons = pygame.sprite.spritecollide(self, self.game.cannons, False)
-        if collided_cannons:
+        elif collided_cannons:
             self.attacking = True
             for cannon in collided_cannons:
                 cannon.take_damage(1)

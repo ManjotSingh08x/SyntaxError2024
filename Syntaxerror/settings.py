@@ -9,10 +9,10 @@ class Settings:
         self.mountain_rate = 0.25
         self.tree_chance = 0.05
         self.clear_area_scale = 0.6
-        self.enemy_speed = 2
+        self.enemy_speed = 1.5
         self.wall_health = 100
         self.enemy_damage = 1
-        self.enemy_health = 100 
+        self.enemy_health = 3
         self.player_size = self.cell_size
         self.player_max_speed = 15
         self.cannon_color = (0,0,0)
