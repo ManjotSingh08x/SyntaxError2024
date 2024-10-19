@@ -46,7 +46,7 @@ class Game:
             self.draw_enemies()   
             self.update_cannons()
             self.enemy_pathfind()
-            self.clock.tick(60)
+            #self.clock.tick(60)
             pygame.display.flip()
 
     def _check_events(self):
@@ -145,7 +145,7 @@ class Game:
         grid_x = mouse_x // self.settings.cell_size
         grid_y = mouse_y // self.settings.cell_size
         if self.terrain.grid[grid_y][grid_x][0] == 0:
-            new_cannon = Cannon(self, grid_x, grid_y)
+            new_cannon = Cannon(self, mouse_x, mouse_y)
             self.cannons.add(new_cannon)
             # Place a wall in the grid
             self.terrain.grid[grid_y][grid_x][0] = 5
@@ -153,7 +153,7 @@ class Game:
     def update_cannons(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
         self.cannons.update(mouse_x, mouse_y)
-        self.cannons.draw(self.screen)
+        # self.cannons.draw(self.screen)
         
             
         
