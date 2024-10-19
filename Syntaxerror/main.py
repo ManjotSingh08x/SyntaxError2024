@@ -11,8 +11,12 @@ from player import Player
 import serial.tools.list_ports
 from cannon import Cannon
 from bomb import Bomb
+from enum import Enum
 
-
+class gamestate(Enum):
+    MENU = 0
+    BUILD = 1
+    ATTACK = 2
 
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
@@ -23,6 +27,7 @@ Ra =(200,4,3)
 class Game:
     def __init__(self):
         pygame.init()
+        self.state = gamestate.MENU
         self.settings = Settings()
         self.screen = pygame.display.set_mode((
             self.settings.screen_width,
@@ -45,28 +50,29 @@ class Game:
         self.spawn_enemies()
         # self.set_controller_port()
         self.spawn_player()
-        self.arduino_connected = False
-        ports = serial.tools.list_ports.comports()
-        poorts = [port.device for port in ports]
         self.place_cannon()
-
-    # List available ports
-        
-        print("Available Serial Ports:")
-        for port in poorts:
-            print(port)
-
-        # Check connection for each available port
-        for port in poorts:
-            if self.check_arduino_connection(port):
-                print("checked arduino connected")
-                self.arduino_connected = True
-                self.set_controller_port()
-                break  # Exit loop if connection is successful
+        self.arduino_connected = False
+        if self.settings.arduino_control:
+            ports = serial.tools.list_ports.comports()
+            poorts = [port.device for port in ports]
+            # List available ports
+            print("Available Serial Ports:")
+            for port in poorts:
+                print(port)
+            # Check connection for each available port
+            for port in poorts:
+                if self.check_arduino_connection(port):
+                    print("Arduino connected on port: " + port)
+                    self.arduino_connected = True
+                    self.set_controller_port()
+                    break  # Exit loop if connection is successful
 
 
     def rungame(self):
         while True:
+            if self.state == gamestate.MENU:
+                self.menu()
+                
             self._check_events()
             self._update_walls()
             self.draw_grid()
@@ -74,15 +80,17 @@ class Game:
                 self.move_player_arduino()
             else:
                 self.move_player_keyboard()
+                self.clock.tick(60)
             self._update_bombs()  # Update bombs
             self._update_cannons()  # Update cannons
             self.draw_player()
             self.draw_enemies()   
 
             self.enemy_pathfind()
-            #self.clock.tick(60)
             pygame.display.flip()
-
+            
+    def menu(self):
+        pass
     def _check_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -287,7 +295,30 @@ class Game:
     
     def move_player_keyboard(self):
         keys = pygame.key.get_pressed()
-        print(keys)
+        
+        # Initialize movement vector
+        movement = pygame.math.Vector2(0, 0)
+        
+        # Check for arrow key presses and update movement vector
+        if keys[pygame.K_LEFT]:
+            movement.x -= 1
+        if keys[pygame.K_RIGHT]:
+            movement.x += 1
+        if keys[pygame.K_UP]:
+            movement.y -= 1
+        if keys[pygame.K_DOWN]:
+            movement.y += 1
+        
+        # Normalize the movement vector if it's not zero
+        if movement.length() > 0:
+            movement = movement.normalize()
+        
+        # Apply movement
+        self.player.rect.x += movement.x * self.settings.player_max_speed
+        self.player.rect.y += movement.y * self.settings.player_max_speed
+        
+        # Ensure player stays within screen bounds
+        self.player.rect.clamp_ip(self.screen.get_rect())
         
     def place_cannon(self):
         cannon = Cannon(self)  # Create the cannon at the center

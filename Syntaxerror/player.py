@@ -14,6 +14,7 @@ class Player(Sprite):
         self.screen = game.screen
         self.settings = game.settings
         self.terrain = game.terrain
+        self.build_mode = True
 
         # Create the enemy image and rect
         self.image = pygame.Surface((self.settings.enemy_size, self.settings.enemy_size))  # Create enemy surface
