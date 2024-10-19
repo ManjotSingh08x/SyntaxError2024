@@ -118,6 +118,8 @@ class Game:
             
     def update_walls(self):
         self.walls.update()
+        if self.mousedown:
+            self
         
         
             
