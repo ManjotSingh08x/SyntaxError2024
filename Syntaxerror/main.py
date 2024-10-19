@@ -23,6 +23,7 @@ class Game:
             self.settings.screen_height
             ))
         self.enemies = pygame.sprite.Group()
+        self.walls = pygame.sprite.Group()
         self.mousedown = False
         
         pygame.display.set_caption('Citedal Seige')
@@ -116,11 +117,24 @@ class Game:
         for enemy in self.enemies:
             enemy.find_path()
             
-    def update_walls(self):
+    def _update_walls(self):
         self.walls.update()
+        self.walls.draw(self.screen)
         if self.mousedown:
-            self
-        
+            self._create_new_walls()
+            
+    def _create_new_walls(self):
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+
+        # Convert mouse position to grid coordinates
+        grid_x = mouse_x // self.settings.cell_size
+        grid_y = mouse_y // self.settings.cell_size
+        if self.terrain.grid[grid_y][grid_x][0] == 0:
+            new_wall = Wall(self, grid_x, grid_y)
+            self.walls.add(new_wall)
+            # Place a wall in the grid
+            self.terrain.grid[grid_y][grid_x][0] = 4
+            print("created a wall")
         
             
         
