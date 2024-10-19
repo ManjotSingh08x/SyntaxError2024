@@ -5,6 +5,8 @@ from pygame.sprite import Sprite
 from enemy import Enemy
 from settings import Settings
 from terrain import WFCTerrainGenerator
+from wall import Wall
+
 
 
 GREEN = (0, 255, 0)
@@ -21,6 +23,7 @@ class Game:
             self.settings.screen_height
             ))
         self.enemies = pygame.sprite.Group()
+        self.mousedown = False
         
         pygame.display.set_caption('Citedal Seige')
         self.game_active = True 
@@ -36,6 +39,7 @@ class Game:
     def rungame(self):
         while True:
             self._check_events()
+            self._update_walls()
             self.draw_grid()
             self.draw_enemies()   
             self.enemy_pathfind()
@@ -47,8 +51,29 @@ class Game:
             if event.type == pygame.QUIT:
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    sys.exit()
+                self._check_keydown_events(event)
+            elif event.type == pygame.KEYUP:
+                self._check_keyup_events(event)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                self._check_mouse_button_down_events(event)
+            elif event.type == pygame.MOUSEBUTTONUP:
+                self._check_mouse_button_up_events(event)
+    
+    def _check_keydown_events(self, event):
+        if event.key == pygame.K_ESCAPE:
+            sys.exit()
+    
+    def _check_keyup_events(self, event):
+        pass
+    
+    def _check_mouse_button_down_events(self, event):
+        if event.button == 1:
+            self.mousedown = True
+        
+    
+    def _check_mouse_button_up_events(self, event):
+        if event.button == 1:
+            self.mousedown = False
     
     def draw_grid(self):
         for y in range(self.terrain.height):
@@ -90,6 +115,11 @@ class Game:
     def enemy_pathfind(self):
         for enemy in self.enemies:
             enemy.find_path()
+            
+    def update_walls(self):
+        self.walls.update()
+        
+        
             
         
 
