@@ -9,7 +9,8 @@ TILES = {
     0: ("Grass", Fore.GREEN),    # Grass tile (Green color)
     1: ("Water", Fore.BLUE),     # Water tile (Blue color)
     2: ("Mountain", Fore.RED),    # Mountain tile (Red color)
-    3: ("Tree", Fore.YELLOW)     # Tree tile (Yellow color)
+    3: ("Tree", Fore.YELLOW),     # Tree tile (Yellow color)
+    4: ("Wall", Fore.BLACK)
 }
 
 # Define tile constraints - which tiles can be adjacent to each other

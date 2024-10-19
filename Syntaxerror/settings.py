@@ -3,10 +3,10 @@ class Settings:
         self.screen_width = 800
         self.screen_height = 800
         self.bg_color = (0, 0, 0)
-        self.cell_size = 32
+        self.cell_size = 20
         self.cell_color = (255, 255, 255)
         self.player_color = (0, 0, 255)
-        self.mountain_rate = 1
+        self.mountain_rate = 0.5
         self.tree_chance = 0.05
         self.clear_area_scale = 0.6
         self.enemy_speed = 1
