@@ -12,9 +12,9 @@ class Player(Sprite):
         super().__init__()
         
         self.screen = game.screen
+        self.game = game
         self.settings = game.settings
         self.terrain = game.terrain
-        self.build_mode = True
         self.building = False
 
         # Create the enemy image and rect

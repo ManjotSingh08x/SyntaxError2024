@@ -31,7 +31,7 @@ class Settings_Ard(settings_base.Settings):
 class Settings_Key(settings_base.Settings):
     def __init__(self):
         super().__init__()
-        self.enemy_speed = 0.1
+        self.enemy_speed = 0.05
         self.player_max_speed = 15
 
 class Game:
@@ -43,6 +43,10 @@ class Game:
         self.walls = pygame.sprite.Group()
         self.bombs = pygame.sprite.Group()  # Group for bombs
         self.cannons = pygame.sprite.Group()  # Group for cannons
+        self.mountains = []
+        self.water = []
+        self.trees = []
+        self.grasses = []
         self.attackmode =  False# 0 = buildmode, 1 = attackmode
         self.mousedown = False
         self.font = pygame.font.Font(None, 50)
@@ -78,7 +82,6 @@ class Game:
         self.screen.blit(self.level_image, self.level_rect)
     def runHomeScreen(self):
         while self.hs_running:
-            print('hi')
             self.screen.fill(YELLOW)
             button1_rect = pygame.Rect(self.settings.screen_width // 2 - 150, self.settings.screen_height // 2 - 100, 300, 70)
             button2_rect = pygame.Rect(self.settings.screen_width // 2 - 150, self.settings.screen_height // 2 + 50, 300, 70)
@@ -153,7 +156,6 @@ class Game:
     def rungame(self):
         self.set_timer()
         while self.game_running:
-            print(self.current_level)
             if not self.attackmode:
                 
                 self.buildmode()
@@ -172,6 +174,7 @@ class Game:
                     self.set_timer()
                     self.current_level += 1
             self.display_levels()
+              # Update cannons
             self.enemy_pathfind()
             pygame.display.flip()
     
@@ -182,10 +185,10 @@ class Game:
         return time.time() - self.start_time
     
     def buildmode(self):
-        print("build mode")
         self._check_events()
         self.draw_grid()
         self._update_walls()
+        self._update_cannons()
         # self.player.config_player_build()
         
         if self.use_arduino:
@@ -195,7 +198,6 @@ class Game:
             self.clock.tick(60)
         self.draw_player()
     def attackmodefunc(self):
-        print("attack mode")
         self._check_events()
         self.draw_grid()
         self._update_walls()
@@ -206,8 +208,8 @@ class Game:
         else:
             self.move_player_keyboard()
             self.clock.tick(60)
+        self._update_cannons()
         self._update_bombs()  # Update bombs
-        self._update_cannons()  # Update cannons
         self.draw_player()
         self.draw_enemies()  
             
@@ -253,12 +255,17 @@ class Game:
                 rect = pygame.Rect(x * self.settings.cell_size, y * self.settings.cell_size, self.settings.cell_size, self.settings.cell_size)
                 if self.terrain.grid[y][x][0] == 0:  # Grass
                     pygame.draw.rect(self.screen, (0, 255, 0), rect)
+                    self.grasses.append(rect)
                 elif self.terrain.grid[y][x][0] == 1:  # Water
                     pygame.draw.rect(self.screen, (0, 0, 255), rect)
+                    self.water.append(rect)
                 elif self.terrain.grid[y][x][0] == 2:  # Mountain
                     pygame.draw.rect(self.screen, (255, 0, 0), rect)
+                    self.mountains.append(rect)
                 elif self.terrain.grid[y][x][0] == 3:  # Forest
                     pygame.draw.rect(self.screen, (255, 255, 0), rect)
+                    self.trees.append(rect)
+
 
     def _create_enemy(self, x_position, y_position):
         enemy = Enemy(self)
@@ -307,12 +314,13 @@ class Game:
             self.terrain.grid[grid_y][grid_x][0] = 4
     
     def _create_new_walls_at_player(self):
-        grid_x = self.player.rect.x // self.settings.cell_size
-        grid_y = self.player.rect.y // self.settings.cell_size
-        if self.terrain.grid[grid_y][grid_x][0] == 0:
-            new_wall = Wall(self, grid_x, grid_y)
-            self.walls.add(new_wall)
-            self.terrain.grid[grid_y][grid_x][0] = 4
+        grid_x = self.player.rect.centerx // self.settings.cell_size
+        grid_y = self.player.rect.centery // self.settings.cell_size
+        if not self.attackmode:
+            if self.terrain.grid[grid_y][grid_x][0] == 0:
+                new_wall = Wall(self, grid_x, grid_y)
+                self.walls.add(new_wall)
+                self.terrain.grid[grid_y][grid_x][0] = 4
 
     def spawn_player(self):
         self.player = Player(self)
@@ -360,8 +368,24 @@ class Game:
             speed_x = del_x*max_speed_x
             speed_y = del_y*max_speed_y
             
-            self.player.rect.x += speed_x
-            self.player.rect.y += speed_y
+            
+            new_rect = pygame.Rect(self.player.rect.x+ speed_x, self.player.rect.y+speed_y, self.settings.player_size, self.settings.player_size)
+
+            
+            collision = False
+            for wall in self.mountains:
+                if new_rect.colliderect(wall):
+                    collision = True
+                    break
+            for wall in self.water:
+                if new_rect.colliderect(wall):
+                    collision = True
+                    break
+                
+            if not collision:
+                self.player.rect.x += speed_x
+                self.player.rect.y += speed_y
+                
             self.player.rect.clamp_ip(self.screen.get_rect())
             self.run_button_functions(bj, b1, b2, b3)
             
@@ -408,8 +432,25 @@ class Game:
             movement = movement.normalize()
         
         # Apply movement
-        self.player.rect.x += movement.x * self.settings.player_max_speed
-        self.player.rect.y += movement.y * self.settings.player_max_speed
+    
+        
+        new_rect = pygame.Rect(self.player.rect.x+ movement.x * self.settings.player_max_speed, self.player.rect.y+movement.y * self.settings.player_max_speed, self.settings.player_size, self.settings.player_size)
+
+        
+        collision = False
+        for wall in self.mountains:
+            if new_rect.colliderect(wall):
+                collision = True
+                break
+        for wall in self.water:
+            if new_rect.colliderect(wall):
+                collision = True
+                break
+            
+        if not collision:
+            self.player.rect.x += movement.x * self.settings.player_max_speed
+            self.player.rect.y += movement.y * self.settings.player_max_speed
+            
         
         # Ensure player stays within screen bounds
         self.player.rect.clamp_ip(self.screen.get_rect())
@@ -438,7 +479,7 @@ class Game:
 
             # Draw button text
             self.draw_text("Game Over", self.font, WHITE, self.screen, self.settings.screen_width // 2, self.settings.screen_height // 2 - 65)
-            self.draw_text(f"Score: {self.current_level*100}", self.font, WHITE, self.screen, self.settings.screen_width // 2, self.settings.screen_height//2+85)
+            self.draw_text(f"Score: {self.current_level*100-100}", self.font, WHITE, self.screen, self.settings.screen_width // 2, self.settings.screen_height//2+85)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()

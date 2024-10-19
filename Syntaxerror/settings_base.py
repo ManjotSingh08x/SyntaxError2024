@@ -11,7 +11,7 @@ class Settings:
         self.clear_area_scale = 0.6
         self.wall_health = 100
         self.enemy_damage = 1
-        self.enemy_health = 1
+        self.enemy_health = 2
         self.player_size = self.cell_size 
         self.cannon_color = (0,0,0)
         self.cannon_size = self.cell_size
