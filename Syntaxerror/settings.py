@@ -9,7 +9,9 @@ class Settings:
         self.mountain_rate = 0.5
         self.tree_chance = 0.05
         self.clear_area_scale = 0.6
-        self.enemy_speed = 0.6
+        self.enemy_speed = 1
+        self.wall_health = 100
+        self.enemy_damage = 1
         self.enemy_size = self.cell_size
         
         # current best settings

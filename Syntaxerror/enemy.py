@@ -10,6 +10,7 @@ from pygame.sprite import Sprite
 class Enemy(Sprite):
     def __init__(self, game):
         super().__init__()
+        self.game = game
         self.screen = game.screen
         self.settings = game.settings
         self.terrain = game.terrain
@@ -35,6 +36,10 @@ class Enemy(Sprite):
         self.target_grid_position = [self.target_x, self.target_y]
         self.path = self.find_path()
         self.collision_rects = []
+        
+        # attacking confiurations
+        self.attacking = False
+        
 
 
         
@@ -73,9 +78,22 @@ class Enemy(Sprite):
             #print("path drawn")
             
     def update(self):
-        self.pos += self.direction * self.speed
-        self.check_collisions()
-        self.rect.center = self.pos
+        if not self.attacking:
+            self.pos += self.direction * self.speed
+            self.check_collisions()
+            self.rect.center = self.pos
+        
+        collided_walls =pygame.sprite.spritecollide(self, self.game.walls, False)
+        if collided_walls:
+            self.attacking = True
+            for wall in collided_walls:
+                wall.take_damage(1)
+                if wall.health <= 0:
+                    self.attacking = False
+        else:
+            self.attacking = False
+
+        
         
     def get_coord(self):
         x = self.rect.centerx // self.settings.cell_size
