@@ -64,10 +64,10 @@ class Game:
         
         self.walls_left = self.settings.walls_left
         
-        self.grass_img = pygame.image.load(r'assets\grass_drawing2.png')
-        self.water_img = pygame.image.load(r'assets\waterdrawing.png')
-        self.mountain_img = pygame.image.load(r'assets\rockdrawing2.png')
-        self.tree_img = pygame.image.load(r'assets\tree.png')
+        self.grass_img = pygame.image.load(r'assets/grass_drawing2.png')
+        self.water_img = pygame.image.load(r'assets/waterdrawing.png')
+        self.mountain_img = pygame.image.load(r'assets/rockdrawing2.png')
+        self.tree_img = pygame.image.load(r'assets/tree.png')
         
         self.terrain = WFCTerrainGenerator(
         self.settings.screen_width // self.settings.cell_size,
@@ -94,13 +94,13 @@ class Game:
         self.screen.blit(self.level_image, self.level_rect)
         self.screen.blit(self.wall_image, self.walls_rect)
     def runHomeScreen(self):
-        background_image = pygame.image.load(r'assets\ui\load_screen.jpg')
+        background_image = pygame.image.load(r'assets/ui/load_screen.jpg')
         background_image = pygame.transform.scale(background_image, (800, 800))
-        title_image = pygame.image.load(r'assets\ui\banners\citadel_logo.png')
+        title_image = pygame.image.load(r'assets/ui/banners/citadel_logo.png')
         title_image = pygame.transform.scale(title_image, (self.settings.screen_width, title_image.get_height() * self.settings.screen_width // title_image.get_width()))
     
-        arduino_image = pygame.image.load(r'assets\ui\banners\use_arduino.png')
-        keyboard_image = pygame.image.load(r'assets\ui\banners\use_keyboard.png')
+        arduino_image = pygame.image.load(r'assets/ui/banners/use_arduino.png')
+        keyboard_image = pygame.image.load(r'assets/ui/banners/use_keyboard.png')
         
         # Scale images to new sizes
         arduino_image = pygame.transform.scale(arduino_image, (250, 60))
@@ -130,14 +130,14 @@ class Game:
 
             # Animate button on click
             if button1_rect.collidepoint(mouse_pos):
-                arduino_image = pygame.transform.scale(pygame.image.load(r'assets\ui\banners\use_arduino.png'), (320, 90))
+                arduino_image = pygame.transform.scale(pygame.image.load(r'assets/ui/banners/use_arduino.png'), (320, 90))
             else:
-                arduino_image = pygame.transform.scale(pygame.image.load(r'assets\ui\banners\use_arduino.png'), (300, 70))
+                arduino_image = pygame.transform.scale(pygame.image.load(r'assets/ui/banners/use_arduino.png'), (300, 70))
 
             if button2_rect.collidepoint(mouse_pos):
-                keyboard_image = pygame.transform.scale(pygame.image.load(r'assets\ui\banners\use_keyboard.png'), (320, 90))
+                keyboard_image = pygame.transform.scale(pygame.image.load(r'assets/ui/banners/use_keyboard.png'), (320, 90))
             else:
-                keyboard_image = pygame.transform.scale(pygame.image.load(r'assets\ui\banners\use_keyboard.png'), (300, 70))
+                keyboard_image = pygame.transform.scale(pygame.image.load(r'assets/ui/banners/use_keyboard.png'), (300, 70))
 
             # Draw the buttons
             self.screen.blit(arduino_image, button1_rect.topleft)

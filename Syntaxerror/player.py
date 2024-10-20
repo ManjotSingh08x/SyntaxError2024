@@ -40,7 +40,7 @@ class Player(Sprite):
     
 
         # Create the enemy image and rect
-        self.image = pygame.image.load(r"assets\player.png")
+        self.image = pygame.image.load(r"assets/player.png")
         self.rect = self.image.get_rect()
 
         # Grid and position settings
