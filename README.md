@@ -5,6 +5,10 @@ We built a simple building defence game in `pygame` and an Arduino Uno R3 based 
 
 This is a Python-based game built using Pygame and PySerial, featuring randomly generated terrain and A* (A-Star) pathfinding.
 
+You can find the video link in this drive
+## Video Link
+https://drive.google.com/drive/folders/1Wu7UtgHDRqxQ14V49FrwtmtRKda_qlHb
+
 ## Features
 - Randomly Generated Terrain: Each game session generates a new map with random obstacles, ensuring that gameplay remains dynamic. It generates stones, ponds and plains at randomly, while at the same time ensures that the centre area has always some play area.
 - Made a custom textures for terrain.
