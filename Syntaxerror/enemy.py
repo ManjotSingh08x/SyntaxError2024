@@ -16,10 +16,9 @@ class Enemy(Sprite):
         self.terrain = game.terrain
 
         # Create the enemy image and rect
-        self.image = pygame.Surface((self.settings.enemy_size, self.settings.enemy_size))  # Create enemy surface
-        self.image.fill((0, 0, 0))  # Fill it with a color, black in this case
+        self.image = self.game.assets["enemy"]  # Fill it with a color, black in this case
         self.rect = self.image.get_rect()
-        
+        ``
         # movement settings for rendering
         self.pos = self.rect.center
         self.direction = pygame.math.Vector2(0, 0)
@@ -35,7 +34,9 @@ class Enemy(Sprite):
         self.target_grid_position = [self.target_x, self.target_y]
         self.path = self.find_path()
         self.collision_rects = []
-        self.health = self.settings.enemy_health
+        self.speed = self.settings.enemy_speed*(1 + self.settings.difficulty_scaling*self.game.current_level)
+        self.health = self.settings.enemy_health*(1 + self.settings.difficulty_scaling*self.game.current_level)
+        self.attack_damage = self.settings.enemy_attack_damage*(1 + self.settings.difficulty_scaling*self.game.current_level)
         
         # attacking confiurations
         self.attacking = False
@@ -79,7 +80,7 @@ class Enemy(Sprite):
             
     def update(self):
         if not self.attacking:
-            self.pos += self.direction * self.settings.enemy_speed
+            self.pos += self.direction * self.speed
             self.check_collisions()
             self.rect.center = self.pos
         
@@ -89,21 +90,21 @@ class Enemy(Sprite):
         if collided_walls:
             self.attacking = True
             for wall in collided_walls:
-                wall.take_damage(1)
+                wall.take_damage(self.attack_damage)
                 if wall.health <= 0:
                     self.attacking = False
         
         elif collided_cannons:
             self.attacking = True
             for cannon in collided_cannons:
-                cannon.take_damage(1)
+                cannon.take_damage(self.attack_damage)
                 if cannon.health <= 0:
                     self.game.gameOverScreen()
                     self.attacking = False
         elif collided_players:
             self.attacking = True
             for player in collided_players:
-                player.take_damage(1)
+                player.take_damage(self.attack_damage)
             
         else:
             self.attacking = False

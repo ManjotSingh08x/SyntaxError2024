@@ -19,6 +19,8 @@ class Settings:
         self.timer = 10
         self.player_health = 1000
         self.cannon_health = 1000
+        self.difficulty_scaling = 0.5
+        self.enemy_attack_damage = 0.01
         
         # current best settings
         # self.mountain_rate = 0.25

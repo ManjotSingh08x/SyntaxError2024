@@ -7,7 +7,7 @@ from pathfinding.core.diagonal_movement import DiagonalMovement
 import pygame
 from pygame.sprite import Sprite
 
-sprite_sheet = pygame.image.load('assets\player\player.png')
+# sprite_sheet = pygame.image.load('assets\player\player.png')
 
 class Player(Sprite):
     def __init__(self, game):
@@ -22,8 +22,7 @@ class Player(Sprite):
         # movement settings for rendering
 
         # Create the enemy image and rect
-        self.image = pygame.Surface((self.settings.player_size, self.settings.player_size))  # Create enemy surface
-        self.image.fill((0, 255, 255))  # Fill it with a color, black in this case
+        self.image = self.game.assets["player"]  # Fill it with a color, black in this case
         self.rect = self.image.get_rect()
 
         # Grid and position settings

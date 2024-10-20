@@ -15,7 +15,6 @@ from cannon import Cannon
 from bomb import Bomb
 
 
-
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 RED = (255, 0, 0)
@@ -37,6 +36,16 @@ class Settings_Key(settings_base.Settings):
 class Game:
     def __init__(self):
         pygame.init()
+        self.assets = {
+            "player": pygame.image.load("assets/player.png"),
+            "enemy": pygame.image.load("assets/enemy.png"),
+            "wall": pygame.image.load("assets/wall.png"),
+            "cannon": pygame.image.load("assets/cannon.png"),
+            "bomb": pygame.image.load("assets/bomb.png"),
+            "rocks": pygame.image.load("assets/rocks.png"),
+            "water": pygame.image.load("assets/water.png"),
+            "tree": pygame.image.load("assets/tree.png")
+        }
         self.settings = settings_base.Settings()
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
         self.enemies = pygame.sprite.Group()
@@ -294,7 +303,7 @@ class Game:
             for x in range(self.terrain.width):
                 rect = pygame.Rect(x * self.settings.cell_size, y * self.settings.cell_size, self.settings.cell_size, self.settings.cell_size)
                 if self.terrain.grid[y][x][0] == 0:  # Grass
-                    pygame.draw.rect(self.screen, (0, 255, 0), rect)
+                    pygame.
                     self.grasses.append(rect)
                 elif self.terrain.grid[y][x][0] == 1:  # Water
                     pygame.draw.rect(self.screen, (0, 0, 255), rect)
