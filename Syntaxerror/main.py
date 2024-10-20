@@ -24,28 +24,18 @@ WHITE = (255,255,255)
 class Settings_Ard(settings_base.Settings):
     def __init__(self):
         super().__init__()
-        self.enemy_speed = 0.2
+        self.enemy_speed = 0.5
         self.player_max_speed = 10
     
 class Settings_Key(settings_base.Settings):
     def __init__(self):
         super().__init__()
-        self.enemy_speed = 0.05
+        self.enemy_speed = 0.03
         self.player_max_speed = 15
 
 class Game:
     def __init__(self):
         pygame.init()
-        self.assets = {
-            "player": pygame.image.load("assets/player.png"),
-            "enemy": pygame.image.load("assets/enemy.png"),
-            "wall": pygame.image.load("assets/wall.png"),
-            "cannon": pygame.image.load("assets/cannon.png"),
-            "bomb": pygame.image.load("assets/bomb.png"),
-            "rocks": pygame.image.load("assets/rocks.png"),
-            "water": pygame.image.load("assets/water.png"),
-            "tree": pygame.image.load("assets/tree.png")
-        }
         self.settings = settings_base.Settings()
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
         self.enemies = pygame.sprite.Group()
@@ -72,6 +62,13 @@ class Game:
         self.use_arduino = False
         self.arduino_connected = False
         
+        self.walls_left = self.settings.walls_left
+        
+        self.grass_img = pygame.image.load(r'assets\grass_drawing2.png')
+        self.water_img = pygame.image.load(r'assets\waterdrawing.png')
+        self.mountain_img = pygame.image.load(r'assets\rockdrawing2.png')
+        self.tree_img = pygame.image.load(r'assets\tree.png')
+        
         self.terrain = WFCTerrainGenerator(
         self.settings.screen_width // self.settings.cell_size,
         self.settings.screen_height // self.settings.cell_size,
@@ -82,15 +79,20 @@ class Game:
 
     def display_levels(self):
         self.text_color = (30,30,30)
-        self.font = pygame.font.SysFont(None, 48)
+        self.font = pygame.font.SysFont(None, 40)
         
-        level_str = str(self.current_level)
-        self.level_image = self.font.render(level_str, True,
-            self.text_color)
+        level_str = "Level: "+str(self.current_level)
+        walls_left_str = "Walls Left: "+str(self.walls_left)
+        self.level_image = self.font.render(level_str, True, self.text_color)
+        self.wall_image = self.font.render(walls_left_str, True, self.text_color)
         self.level_rect = self.level_image.get_rect()
+        self.walls_rect = self.wall_image.get_rect()
         self.level_rect.right = self.screen.get_rect().right
         self.level_rect.top = 10 + self.screen.get_rect().top
+        self.walls_rect.right = self.screen.get_rect().right
+        self.walls_rect.top = 40 + self.screen.get_rect().top
         self.screen.blit(self.level_image, self.level_rect)
+        self.screen.blit(self.wall_image, self.walls_rect)
     def runHomeScreen(self):
         background_image = pygame.image.load(r'assets\ui\load_screen.jpg')
         background_image = pygame.transform.scale(background_image, (800, 800))
@@ -170,18 +172,25 @@ class Game:
         self.place_cannon()
         self.game_running = True
         self.rungame()
+        
+    def flash_mode(self, text):
+        
+        for i in range(1000):
+            self.screen.fill((100,100,200))
+            self.draw_text(text, self.font, WHITE, self.screen, self.settings.screen_width // 2, self.settings.screen_height // 2)
+            pygame.display.flip()
+
     def rungame(self):
         self.set_timer()
         while self.game_running:
             if not self.attackmode:
-                
                 self.buildmode()
                 # swtiches from buildmode to attackmode
                 if self.past_time()>self.settings.timer:
-                    print("TIME OVER")
+              
                     self.attackmode = True
                     self.spawn_enemies()
-                    print("switched attackmode")
+                    self.flash_mode("Attack Mode!")
                     
             else:
                 # swtiches from attackmode to buildmode
@@ -191,8 +200,12 @@ class Game:
                     self.set_timer()
                     self.current_level += 1
                     self.player.health = self.settings.player_health
+                    self.walls_left += 10 + self.current_level
+                    self.flash_mode("Build Mode!")
+
             self.display_levels()
               # Update cannons
+            # pygame.draw.rect(self.screen, (0,0,0), self.player.rect)
             self.enemy_pathfind()
             self.draw_health_bar_player()
             self.draw_health_bar_cannon()
@@ -245,10 +258,11 @@ class Game:
         current_bar_width = int(bar_width * health_ratio)  # Width of the current health bar
 
         # Draw the health bar background (empty portion)
-        pygame.draw.rect(self.screen, (255, 150, 50), (20, 20, bar_width, bar_height))
+        pygame.draw.rect(self.screen, (255, 150, 80), (70, 20, bar_width, bar_height))
+        pygame.draw.rect(self.screen, (150, 255, 80), (70, 20, current_bar_width, bar_height))
 
+        self.draw_text("Player health", pygame.font.Font(None, 20), BLUE, self.screen, 50, 20)
         # Draw the current health portion (filled portion)
-        pygame.draw.rect(self.screen, (150, 255, 50), (20, 20, current_bar_width, bar_height))
         
     def draw_health_bar_cannon(self):
         bar_width = 200  # Total width of the health bar
@@ -258,10 +272,12 @@ class Game:
             current_bar_width = int(bar_width * health_ratio)  # Width of the current health bar
 
             # Draw the health bar background (empty portion)
-            pygame.draw.rect(self.screen, (255, 150, 0), (50 + bar_width, 20, bar_width, bar_height))
+            pygame.draw.rect(self.screen, (255, 150, 0), (70, 60, bar_width, bar_height))
+            pygame.draw.rect(self.screen, (150, 255, 0), (70, 60, current_bar_width, bar_height))
+
+            self.draw_text("Townhall health", pygame.font.Font(None, 20), BLUE, self.screen, 50, 60)
 
             # Draw the current health portion (filled portion)
-            pygame.draw.rect(self.screen, (150, 255, 0), (50 + bar_width, 20, current_bar_width, bar_height))
 
     def _check_events(self):
         for event in pygame.event.get():
@@ -303,16 +319,20 @@ class Game:
             for x in range(self.terrain.width):
                 rect = pygame.Rect(x * self.settings.cell_size, y * self.settings.cell_size, self.settings.cell_size, self.settings.cell_size)
                 if self.terrain.grid[y][x][0] == 0:  # Grass
-                    pygame.
+                    self.screen.blit(self.grass_img, rect)
+                    self.screen.blit(self.grass_img, rect)
                     self.grasses.append(rect)
                 elif self.terrain.grid[y][x][0] == 1:  # Water
-                    pygame.draw.rect(self.screen, (0, 0, 255), rect)
+                    self.screen.blit(self.grass_img, rect)
+                    self.screen.blit(self.water_img, rect)
                     self.water.append(rect)
                 elif self.terrain.grid[y][x][0] == 2:  # Mountain
-                    pygame.draw.rect(self.screen, (255, 0, 0), rect)
+                    self.screen.blit(self.grass_img, rect)
+                    self.screen.blit(self.mountain_img, rect)
                     self.mountains.append(rect)
                 elif self.terrain.grid[y][x][0] == 3:  # Forest
-                    pygame.draw.rect(self.screen, (255, 255, 0), rect)
+                    self.screen.blit(self.grass_img, rect)
+                    self.screen.blit(self.tree_img, rect)
                     self.trees.append(rect)
 
 
@@ -336,6 +356,10 @@ class Game:
             (0, 0), 
             (len(self.terrain.grid[0]) - 1, len(self.terrain.grid) - 1),
             (0, len(self.terrain.grid) - 1), 
+            #(len(self.terrain.grid)//2 - 1, 0),
+            (len(self.terrain.grid[0]) - 1, len(self.terrain.grid)//2 - 1),
+            #(0, len(self.terrain.grid)//2 - 1),
+            (len(self.terrain.grid)//2 - 1, len(self.terrain.grid) - 1),
             (len(self.terrain.grid[0]) - 1, 0)
         ]
         for position in positions:
@@ -348,9 +372,9 @@ class Game:
     def _update_walls(self):
         self.walls.update()
         self.walls.draw(self.screen)
-        if self.mousedown:
-            self._create_new_walls_at_mouse()
-        elif self.player.building:
+        # if self.mousedown:
+        #     self._create_new_walls_at_mouse()
+        if self.player.building:
             self._create_new_walls_at_player()
 
     def _create_new_walls_at_mouse(self):
@@ -365,11 +389,13 @@ class Game:
     def _create_new_walls_at_player(self):
         grid_x = self.player.rect.centerx // self.settings.cell_size
         grid_y = self.player.rect.centery // self.settings.cell_size
-        if not self.attackmode:
+        if not self.attackmode and self.walls_left>0:
             if self.terrain.grid[grid_y][grid_x][0] == 0:
                 new_wall = Wall(self, grid_x, grid_y)
                 self.walls.add(new_wall)
                 self.terrain.grid[grid_y][grid_x][0] = 4
+                
+                self.walls_left-=1
 
     def spawn_player(self):
         self.player = Player(self)
@@ -418,10 +444,8 @@ class Game:
         
             speed_x = del_x*max_speed_x
             speed_y = del_y*max_speed_y
-            
-            
+                        
             new_rect = pygame.Rect(self.player.rect.x+ speed_x, self.player.rect.y+speed_y, self.settings.player_size, self.settings.player_size)
-
             
             collision = False
             for wall in self.mountains:
@@ -434,6 +458,7 @@ class Game:
                     break
                 
             if not collision:
+                self.player.moving = True
                 self.player.rect.x += speed_x
                 self.player.rect.y += speed_y
                 
@@ -450,19 +475,20 @@ class Game:
 
     def run_button_functions(self, bj, b1, b2, b3):
         if b1:
-            print("b1 pressed")
+
             self.player.building = True
         else:
             self.player.building = False
         if b2:
-            print("b2 pressed")
+
             self.player_attack = True
         else:
             self.player_attack = False
         if b3:
-            print("b3 pressed")
+            pass
         if bj:
-            print("bj pressed")
+            pass
+
     
     def move_player_keyboard(self):
         
@@ -480,6 +506,8 @@ class Game:
             movement.y -= 1
         if keys[pygame.K_DOWN]:
             movement.y += 1
+        
+            
         
         # Normalize the movement vector if it's not zero
         if movement.length() > 0:
@@ -502,6 +530,7 @@ class Game:
                 break
             
         if not collision:
+            self.player.moving = True
             self.player.rect.x += movement.x * self.settings.player_max_speed
             self.player.rect.y += movement.y * self.settings.player_max_speed
             
@@ -525,8 +554,8 @@ class Game:
     def gameOverScreen(self):
         self.game_running = False
         while True:
-            print('game over')
-            self.screen.fill(YELLOW)
+
+            self.screen.fill(RED)
             
             # Change button colors on hover
             # Draw the buttons

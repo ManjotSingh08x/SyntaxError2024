@@ -7,7 +7,8 @@ class Bomb(pygame.sprite.Sprite):
         super().__init__()
         self.game = cannon.game
         self.enemy = enemy
-        self.image = self.assets["bomb"]
+        self.image = pygame.Surface((10, 10))  # Size of the bomb
+        self.image.fill((255, 0, 0))  # Color of the bomb
         self.rect = self.image.get_rect(center=cannon.rect.center)
         self.target_pos = self.enemy.rect.center
         self.speed = 5

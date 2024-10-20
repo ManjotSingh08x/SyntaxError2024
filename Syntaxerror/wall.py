@@ -11,8 +11,9 @@ class Wall(Sprite):
         self.x = x_position
         self.y = y_position
         self.settings = game.settings
-        self.image = pygame.Surface((self.settings.enemy_size, self.settings.enemy_size))  # Create enemy surface
-        self.image.fill((150, 75, 0))  # Fill it with a color, black in this case
+        self.image = pygame.image.load(r'assets/rockdrawing.png')  # Create enemy surface
+        
+        # self.image.fill((150, 75, 0))  # Fill it with a color, black in this case
         self.rect = self.image.get_rect()
 
         self.rect.x = x_position * self.settings.cell_size
@@ -24,7 +25,6 @@ class Wall(Sprite):
         
     def take_damage(self, damage):
         self.health -= damage
-        print("wall taking damage")
         if self.health <= 0:
             self.game.terrain.grid[self.y][self.x][0] = 0
             self.kill()

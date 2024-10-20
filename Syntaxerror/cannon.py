@@ -7,8 +7,8 @@ class Cannon(pygame.sprite.Sprite):
     def __init__(self, game):
         super().__init__()
         self.game = game
-        self.image = pygame.Surface((50, 50))  # Size of the cannon
-        self.image.fill((255, 192, 203))  # Pink color for the cannon
+        self.image = pygame.image.load(r'assets/cannon.png')  # Size of the cannon
+        # self.image.fill((255, 192, 203))  # Pink color for the cannon
         self.rect = self.image.get_rect(center=(game.settings.screen_width // 2, game.settings.screen_height // 2))
         self.x = self.rect.x
         self.y = self.rect.y
@@ -31,7 +31,7 @@ class Cannon(pygame.sprite.Sprite):
             self.game.bombs.add(bomb)  # Add bomb to the game
     def take_damage(self, damage):
         self.health -= damage
-        print("cannon taking damage")
+
         if self.health <= 0:
             self.kill()
             self.game.gameOverScreen()

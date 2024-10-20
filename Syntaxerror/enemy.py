@@ -16,9 +16,10 @@ class Enemy(Sprite):
         self.terrain = game.terrain
 
         # Create the enemy image and rect
-        self.image = self.game.assets["enemy"]  # Fill it with a color, black in this case
+        self.image = pygame.image.load('assets/enemy.png')  # Create enemy surface
+        # self.image.fill((0, 0, 0))  # Fill it with a color, black in this case
         self.rect = self.image.get_rect()
-        ``
+        
         # movement settings for rendering
         self.pos = self.rect.center
         self.direction = pygame.math.Vector2(0, 0)
@@ -73,10 +74,8 @@ class Enemy(Sprite):
                     continue
                 x, y = point
                 points.append(((x + 0.5) * self.grid_size, (y + 0.5) * self.grid_size))
-            # print(points)
-            if len(points) > 1:
-                pygame.draw.lines(self.screen, (255, 0, 0), False, points, 2)
-            #print("path drawn")
+            # if len(points) > 1:
+            #     pygame.draw.lines(self.screen, (255, 0, 0), False, points, 2)
             
     def update(self):
         if not self.attacking:
@@ -142,6 +141,6 @@ class Enemy(Sprite):
             self.path = [0]  
     def take_damage(self, damage):
         self.health -= damage
-        print("enemy taking damage") 
+
         if self.health <= 0:
             self.kill()
