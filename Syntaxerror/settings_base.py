@@ -16,7 +16,7 @@ class Settings:
         self.cannon_color = (0,0,0)
         self.cannon_size = self.cell_size
         self.enemy_size = self.cell_size
-        self.timer = 10
+        self.timer = 5
         self.cannon_health = 1000
         
         # current best settings

@@ -17,6 +17,7 @@ class Player(Sprite):
         self.terrain = game.terrain
         self.building = False
 
+
         # Create the enemy image and rect
         self.image = pygame.Surface((self.settings.enemy_size, self.settings.enemy_size))  # Create enemy surface
         self.image.fill((0, 255, 255))  # Fill it with a color, black in this case
@@ -26,6 +27,19 @@ class Player(Sprite):
         self.start_pos = [self.settings.screen_width // (self.settings.cell_size * 2), self.settings.screen_height // (self.settings.cell_size * 2)]
         self.grid_pos = [self.settings.screen_width // (self.settings.cell_size * 2), self.settings.screen_height // (self.settings.cell_size * 2)]  # Starting grid position
         self.grid_size = self.settings.cell_size
+        
+        
+        
+    def calculate(self):
+        collided_enemies = pygame.sprite.spritecollide(self, self.game.enemies, False)
+        for enemy in collided_enemies:
+            if self.game.player_attack:
+                enemy.take_damage(1)
+                print("mar rha hu")
+                #player attack animations
 
+            
     def draw(self, surface):
         surface.blit(self.image, self.rect)
+    def fight_enemy(self):
+        self

@@ -43,6 +43,7 @@ class Game:
         self.walls = pygame.sprite.Group()
         self.bombs = pygame.sprite.Group()  # Group for bombs
         self.cannons = pygame.sprite.Group()  # Group for cannons
+        self.players = pygame.sprite.Group()
         self.mountains = []
         self.water = []
         self.trees = []
@@ -51,6 +52,7 @@ class Game:
         self.mousedown = False
         self.font = pygame.font.Font(None, 50)
         self.current_level = 1
+        self.player_attack = False
 
         pygame.display.set_caption('Citadel Siege')
         self.game_active = True 
@@ -236,10 +238,14 @@ class Game:
             self.game_running = False
         elif event.key == pygame.K_SPACE:
             self.player.building = True
+        elif event.key == pygame.K_f:
+            self.player_attack = True
 
     def _check_keyup_events(self, event):
         if event.key == pygame.K_SPACE:
             self.player.building = False
+        elif event.key == pygame.K_f:
+            self.player_attack = False
 
     def _check_mouse_button_down_events(self, event):
         if event.button == 1:
@@ -326,9 +332,11 @@ class Game:
         self.player = Player(self)
         self.player.rect.x = self.player.start_pos[0] * self.settings.cell_size
         self.player.rect.y = self.player.start_pos[1] * self.settings.cell_size
+        self.players.add(self.player)
         self.player.draw(self.screen)
         
     def draw_player(self):
+        self.player.calculate()
         self.player.update()
         self.player.draw(self.screen)
         
@@ -405,6 +413,9 @@ class Game:
             self.player.building = False
         if b2:
             print("b2 pressed")
+            self.player_attack = True
+        else:
+            self.player_attack = False
         if b3:
             print("b3 pressed")
         if bj:

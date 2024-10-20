@@ -85,6 +85,7 @@ class Enemy(Sprite):
         
         collided_walls =pygame.sprite.spritecollide(self, self.game.walls, False)
         collided_cannons = pygame.sprite.spritecollide(self, self.game.cannons, False)
+        collided_players = pygame.sprite.spritecollide(self, self.game.players, False)
         if collided_walls:
             self.attacking = True
             for wall in collided_walls:
@@ -99,6 +100,9 @@ class Enemy(Sprite):
                 if cannon.health <= 0:
                     self.game.gameOverScreen()
                     self.attacking = False
+        elif collided_players:
+            self.attacking = True
+            
         else:
             self.attacking = False
 
