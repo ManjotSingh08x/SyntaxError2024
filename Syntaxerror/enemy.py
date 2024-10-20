@@ -102,6 +102,8 @@ class Enemy(Sprite):
                     self.attacking = False
         elif collided_players:
             self.attacking = True
+            for player in collided_players:
+                player.take_damage(1)
             
         else:
             self.attacking = False

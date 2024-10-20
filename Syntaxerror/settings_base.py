@@ -11,12 +11,13 @@ class Settings:
         self.clear_area_scale = 0.6
         self.wall_health = 100
         self.enemy_damage = 1
-        self.enemy_health = 2
-        self.player_size = self.cell_size 
+        self.enemy_health = 5
+        self.player_size = 20
         self.cannon_color = (0,0,0)
         self.cannon_size = self.cell_size
         self.enemy_size = self.cell_size
-        self.timer = 5
+        self.timer = 10
+        self.player_health = 1000
         self.cannon_health = 1000
         
         # current best settings

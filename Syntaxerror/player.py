@@ -7,6 +7,8 @@ from pathfinding.core.diagonal_movement import DiagonalMovement
 import pygame
 from pygame.sprite import Sprite
 
+sprite_sheet = pygame.image.load('assets\player\player.png')
+
 class Player(Sprite):
     def __init__(self, game):
         super().__init__()
@@ -16,10 +18,11 @@ class Player(Sprite):
         self.settings = game.settings
         self.terrain = game.terrain
         self.building = False
-
+        self.health = self.settings.player_health
+        # movement settings for rendering
 
         # Create the enemy image and rect
-        self.image = pygame.Surface((self.settings.enemy_size, self.settings.enemy_size))  # Create enemy surface
+        self.image = pygame.Surface((self.settings.player_size, self.settings.player_size))  # Create enemy surface
         self.image.fill((0, 255, 255))  # Fill it with a color, black in this case
         self.rect = self.image.get_rect()
 
@@ -41,5 +44,10 @@ class Player(Sprite):
             
     def draw(self, surface):
         surface.blit(self.image, self.rect)
-    def fight_enemy(self):
-        self
+    def take_damage(self, damage):
+        self.health -= damage
+        print(self.health)
+        print("player taking damage")
+        if self.health <= 0:
+            self.kill()
+            self.game.gameOverScreen()

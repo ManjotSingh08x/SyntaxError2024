@@ -25,8 +25,8 @@ WHITE = (255,255,255)
 class Settings_Ard(settings_base.Settings):
     def __init__(self):
         super().__init__()
-        self.enemy_speed = 1
-        self.player_max_speed = 15
+        self.enemy_speed = 0.2
+        self.player_max_speed = 10
     
 class Settings_Key(settings_base.Settings):
     def __init__(self):
@@ -83,33 +83,29 @@ class Game:
         self.level_rect.top = 10 + self.screen.get_rect().top
         self.screen.blit(self.level_image, self.level_rect)
     def runHomeScreen(self):
+        background_image = pygame.image.load(r'assets\ui\load_screen.jpg')
+        background_image = pygame.transform.scale(background_image, (800, 800))
+        title_image = pygame.image.load(r'assets\ui\banners\citadel_logo.png')
+        title_image = pygame.transform.scale(title_image, (self.settings.screen_width, title_image.get_height() * self.settings.screen_width // title_image.get_width()))
+    
+        arduino_image = pygame.image.load(r'assets\ui\banners\use_arduino.png')
+        keyboard_image = pygame.image.load(r'assets\ui\banners\use_keyboard.png')
+        
+        # Scale images to new sizes
+        arduino_image = pygame.transform.scale(arduino_image, (250, 60))
+        keyboard_image = pygame.transform.scale(keyboard_image, (250, 60))
+        
         while self.hs_running:
-            self.screen.fill(YELLOW)
-            button1_rect = pygame.Rect(self.settings.screen_width // 2 - 150, self.settings.screen_height // 2 - 100, 300, 70)
-            button2_rect = pygame.Rect(self.settings.screen_width // 2 - 150, self.settings.screen_height // 2 + 50, 300, 70)
+            self.screen.blit(background_image, (0, 0))
+            self.screen.blit(title_image, (0, 50))
+            
+            button1_rect = pygame.Rect(self.settings.screen_width // 2 - 125, self.settings.screen_height // 2 - 20, 250, 60)
+            button2_rect = pygame.Rect(self.settings.screen_width // 2 - 125, self.settings.screen_height // 2 + 80, 250, 60)
 
             # Get the mouse position
             mouse_pos = pygame.mouse.get_pos()
 
-            # Change button colors on hover
-            if button1_rect.collidepoint(mouse_pos):
-                button1_color = BLUE
-            else:
-                button1_color = GREEN
-
-            if button2_rect.collidepoint(mouse_pos):
-                button2_color = BLUE
-            else:
-                button2_color = RED
-
-            # Draw the buttons
-            pygame.draw.rect(self.screen, button1_color, button1_rect)
-            pygame.draw.rect(self.screen, button2_color, button2_rect)
-
-            # Draw button text
-            self.draw_text("Use Arduino", self.font, WHITE, self.screen, self.settings.screen_width // 2, self.settings.screen_height // 2 - 65)
-            self.draw_text("Use Keyboard", self.font, WHITE, self.screen, self.settings.screen_width // 2, self.settings.screen_height // 2 + 85)
-            
+            # Check button hover and click
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
@@ -120,16 +116,28 @@ class Game:
                     if button2_rect.collidepoint(event.pos):
                         self.use_arduino = False
                         self.hs_running = False
-                        
+
+            # Animate button on click
+            if button1_rect.collidepoint(mouse_pos):
+                arduino_image = pygame.transform.scale(pygame.image.load(r'assets\ui\banners\use_arduino.png'), (320, 90))
+            else:
+                arduino_image = pygame.transform.scale(pygame.image.load(r'assets\ui\banners\use_arduino.png'), (300, 70))
+
+            if button2_rect.collidepoint(mouse_pos):
+                keyboard_image = pygame.transform.scale(pygame.image.load(r'assets\ui\banners\use_keyboard.png'), (320, 90))
+            else:
+                keyboard_image = pygame.transform.scale(pygame.image.load(r'assets\ui\banners\use_keyboard.png'), (300, 70))
+
+            # Draw the buttons
+            self.screen.blit(arduino_image, button1_rect.topleft)
+            self.screen.blit(keyboard_image, button2_rect.topleft)
+
             pygame.display.flip()
-                        
+
         self.screen.fill(YELLOW)
         if self.use_arduino:
-            self.settings = Settings_Ard()
-            
             ports = serial.tools.list_ports.comports()
             for port in ports:
-                print(port)
                 if 'Arduino' in port.description:
                     try:
                         self.ard = serial.Serial(port.device, 9600)
@@ -139,20 +147,18 @@ class Game:
                         sys.exit()
                     self.arduino_connected = True
                     break
-                
+            self.settings = Settings_Ard()
+
             if not self.arduino_connected:
                 print("No connected arduino found")
                 sys.exit()
         else:
-            
             self.settings = Settings_Key()
             self.settings.player_max_speed = 4
             self.settings.enemy_speed = 1
-            
         self.spawn_player()
         self.spawn_enemies()
-        self.place_cannon()  # Automatically place cannon in the center
-
+        self.place_cannon()
         self.game_running = True
         self.rungame()
     def rungame(self):
@@ -175,9 +181,12 @@ class Game:
                     self.attackmode = False
                     self.set_timer()
                     self.current_level += 1
+                    self.player.health = self.settings.player_health
             self.display_levels()
               # Update cannons
             self.enemy_pathfind()
+            self.draw_health_bar_player()
+            self.draw_health_bar_cannon()
             pygame.display.flip()
     
     def set_timer(self):
@@ -185,7 +194,6 @@ class Game:
     
     def past_time(self):
         return time.time() - self.start_time
-    
     def buildmode(self):
         self._check_events()
         self.draw_grid()
@@ -219,6 +227,32 @@ class Game:
         text_obj = font.render(text, True, color)
         text_rect = text_obj.get_rect(center=(x, y))
         surface.blit(text_obj, text_rect)
+        
+    def draw_health_bar_player(self):
+        bar_width = 200  # Total width of the health bar
+        bar_height = 20  # Height of the health bar
+        player = self.player
+        health_ratio = player.health / self.settings.player_health  # Ratio of current health to max health
+        current_bar_width = int(bar_width * health_ratio)  # Width of the current health bar
+
+        # Draw the health bar background (empty portion)
+        pygame.draw.rect(self.screen, (255, 150, 50), (20, 20, bar_width, bar_height))
+
+        # Draw the current health portion (filled portion)
+        pygame.draw.rect(self.screen, (150, 255, 50), (20, 20, current_bar_width, bar_height))
+        
+    def draw_health_bar_cannon(self):
+        bar_width = 200  # Total width of the health bar
+        bar_height = 20  # Height of the health bar
+        for cannon in self.cannons:
+            health_ratio = cannon.health / self.settings.cannon_health  # Ratio of current health to max health
+            current_bar_width = int(bar_width * health_ratio)  # Width of the current health bar
+
+            # Draw the health bar background (empty portion)
+            pygame.draw.rect(self.screen, (255, 150, 0), (50 + bar_width, 20, bar_width, bar_height))
+
+            # Draw the current health portion (filled portion)
+            pygame.draw.rect(self.screen, (150, 255, 0), (50 + bar_width, 20, current_bar_width, bar_height))
 
     def _check_events(self):
         for event in pygame.event.get():
