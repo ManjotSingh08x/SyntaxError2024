@@ -35,6 +35,15 @@ python -m pip install -r requirements.txt
 python main.py
 ```
 4. Enjoy!
+## Assets
+the following assets have been drawn by us using pixil-art online tool
+1. assets/enemy.png
+2. assets/grass-drawing2.png
+3. assets/rock-drawing2.png
+4. assets/vertical-wall.png
+5. assets/wall-texture.png
+6. assets/wall.png
+7. assets/waterdrawing.png
 
 ## Team Members
 
