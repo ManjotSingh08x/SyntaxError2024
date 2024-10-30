@@ -30,7 +30,7 @@ class Settings_Ard(settings_base.Settings):
 class Settings_Key(settings_base.Settings):
     def __init__(self):
         super().__init__()
-        self.enemy_speed = 0.03
+        self.enemy_speed = 0.02
         self.player_max_speed = 15
 
 class Game:
@@ -64,10 +64,10 @@ class Game:
         
         self.walls_left = self.settings.walls_left
         
-        self.grass_img = pygame.image.load(r'assets/grass_drawing2.png')
-        self.water_img = pygame.image.load(r'assets/waterdrawing.png')
-        self.mountain_img = pygame.image.load(r'assets/rockdrawing2.png')
-        self.tree_img = pygame.image.load(r'assets/tree.png')
+        self.grass_img = pygame.image.load(r'assets/grass_drawing2.png').convert_alpha()
+        self.water_img = pygame.image.load(r'assets/waterdrawing.png').convert_alpha()
+        self.mountain_img = pygame.image.load(r'assets/rockdrawing2.png').convert_alpha()
+        self.tree_img = pygame.image.load(r'assets/tree.png').convert_alpha()
         
         self.terrain = WFCTerrainGenerator(
         self.settings.screen_width // self.settings.cell_size,
@@ -94,13 +94,13 @@ class Game:
         self.screen.blit(self.level_image, self.level_rect)
         self.screen.blit(self.wall_image, self.walls_rect)
     def runHomeScreen(self):
-        background_image = pygame.image.load(r'assets/ui/load_screen.jpg')
+        background_image = pygame.image.load(r'assets/ui/load_screen.jpg').convert_alpha()
         background_image = pygame.transform.scale(background_image, (800, 800))
         title_image = pygame.image.load(r'assets/ui/banners/citadel_logo.png')
         title_image = pygame.transform.scale(title_image, (self.settings.screen_width, title_image.get_height() * self.settings.screen_width // title_image.get_width()))
-    
-        arduino_image = pygame.image.load(r'assets/ui/banners/use_arduino.png')
-        keyboard_image = pygame.image.load(r'assets/ui/banners/use_keyboard.png')
+
+        arduino_image = pygame.image.load(r'assets/ui/banners/use_arduino.png').convert_alpha()
+        keyboard_image = pygame.image.load(r'assets/ui/banners/use_keyboard.png').convert_alpha()
         
         # Scale images to new sizes
         arduino_image = pygame.transform.scale(arduino_image, (250, 60))
@@ -130,14 +130,14 @@ class Game:
 
             # Animate button on click
             if button1_rect.collidepoint(mouse_pos):
-                arduino_image = pygame.transform.scale(pygame.image.load(r'assets/ui/banners/use_arduino.png'), (320, 90))
+                arduino_image = pygame.transform.scale(arduino_image, (320, 90))
             else:
-                arduino_image = pygame.transform.scale(pygame.image.load(r'assets/ui/banners/use_arduino.png'), (300, 70))
+                arduino_image = pygame.transform.scale(arduino_image, (300, 70))
 
             if button2_rect.collidepoint(mouse_pos):
-                keyboard_image = pygame.transform.scale(pygame.image.load(r'assets/ui/banners/use_keyboard.png'), (320, 90))
+                keyboard_image = pygame.transform.scale(keyboard_image, (320, 90))
             else:
-                keyboard_image = pygame.transform.scale(pygame.image.load(r'assets/ui/banners/use_keyboard.png'), (300, 70))
+                keyboard_image = pygame.transform.scale(keyboard_image, (300, 70))
 
             # Draw the buttons
             self.screen.blit(arduino_image, button1_rect.topleft)
@@ -206,7 +206,8 @@ class Game:
             self.display_levels()
               # Update cannons
             # pygame.draw.rect(self.screen, (0,0,0), self.player.rect)
-            self.enemy_pathfind()
+            if self.settings.show_path:
+                self.enemy_pathfind()
             self.draw_health_bar_player()
             self.draw_health_bar_cannon()
             pygame.display.flip()
@@ -357,9 +358,9 @@ class Game:
             (len(self.terrain.grid[0]) - 1, len(self.terrain.grid) - 1),
             (0, len(self.terrain.grid) - 1), 
             #(len(self.terrain.grid)//2 - 1, 0),
-            (len(self.terrain.grid[0]) - 1, len(self.terrain.grid)//2 - 1),
+            #(len(self.terrain.grid[0]) - 1, len(self.terrain.grid)//2 - 1),
             #(0, len(self.terrain.grid)//2 - 1),
-            (len(self.terrain.grid)//2 - 1, len(self.terrain.grid) - 1),
+            #(len(self.terrain.grid)//2 - 1, len(self.terrain.grid) - 1),
             (len(self.terrain.grid[0]) - 1, 0)
         ]
         for position in positions:

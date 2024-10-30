@@ -7,7 +7,7 @@ class Cannon(pygame.sprite.Sprite):
     def __init__(self, game):
         super().__init__()
         self.game = game
-        self.image = pygame.image.load(r'assets/cannon.png')  # Size of the cannon
+        self.image = pygame.image.load(r'assets/cannon.png').convert_alpha() # Size of the cannon
         # self.image.fill((255, 192, 203))  # Pink color for the cannon
         self.rect = self.image.get_rect(center=(game.settings.screen_width // 2, game.settings.screen_height // 2))
         self.x = self.rect.x

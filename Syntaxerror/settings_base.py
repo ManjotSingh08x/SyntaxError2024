@@ -22,6 +22,7 @@ class Settings:
         self.difficulty_scaling = 0.5
         self.enemy_attack_damage = 1.1
         self.walls_left = 25
+        self.show_path = True
         
         # current best settings
         # self.mountain_rate = 0.25

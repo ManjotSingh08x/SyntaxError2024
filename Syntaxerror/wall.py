@@ -11,7 +11,7 @@ class Wall(Sprite):
         self.x = x_position
         self.y = y_position
         self.settings = game.settings
-        self.image = pygame.image.load(r'assets/rockdrawing.png')  # Create enemy surface
+        self.image = pygame.image.load(r'assets/rockdrawing.png').convert_alpha()  # Create enemy surface
         
         # self.image.fill((150, 75, 0))  # Fill it with a color, black in this case
         self.rect = self.image.get_rect()

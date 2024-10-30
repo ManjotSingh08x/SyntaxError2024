@@ -16,7 +16,7 @@ class Enemy(Sprite):
         self.terrain = game.terrain
 
         # Create the enemy image and rect
-        self.image = pygame.image.load('assets/enemy.png')  # Create enemy surface
+        self.image = pygame.image.load('assets/enemy.png').convert_alpha()  # Create enemy surface
         # self.image.fill((0, 0, 0))  # Fill it with a color, black in this case
         self.rect = self.image.get_rect()
         
@@ -74,8 +74,9 @@ class Enemy(Sprite):
                     continue
                 x, y = point
                 points.append(((x + 0.5) * self.grid_size, (y + 0.5) * self.grid_size))
-            # if len(points) > 1:
-            #     pygame.draw.lines(self.screen, (255, 0, 0), False, points, 2)
+            if self.game.settings.show_path:    
+                if len(points) > 1:
+                    pygame.draw.lines(self.screen, (255, 0, 0), False, points, 2)
             
     def update(self):
         if not self.attacking:
@@ -91,8 +92,7 @@ class Enemy(Sprite):
             for wall in collided_walls:
                 wall.take_damage(self.attack_damage)
                 if wall.health <= 0:
-                    self.attacking = False
-        
+                    self.attacking = False     
         elif collided_cannons:
             self.attacking = True
             for cannon in collided_cannons:
@@ -110,6 +110,11 @@ class Enemy(Sprite):
 
         
         
+    def take_damage(self, damage):
+        self.health -= damage
+
+        if self.health <= 0:
+            self.kill()
     def get_coord(self):
         x = self.rect.centerx // self.settings.cell_size
         y = self.rect.centery // self.settings.cell_size
@@ -139,8 +144,3 @@ class Enemy(Sprite):
         else:
             self.direction = pygame.math.Vector2(0,0)
             self.path = [0]  
-    def take_damage(self, damage):
-        self.health -= damage
-
-        if self.health <= 0:
-            self.kill()
