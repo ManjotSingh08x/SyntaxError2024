@@ -7,7 +7,7 @@ class Settings:
         self.cell_color = (255, 255, 255)
         self.player_color = (0, 0, 255)
         self.mountain_rate = 0.25
-        self.tree_chance = 0.05
+        self.tree_chance = 0.1
         self.clear_area_scale = 0.6
         self.wall_health = 500
         self.enemy_damage = 1
